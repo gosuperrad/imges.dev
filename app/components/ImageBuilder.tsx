@@ -21,6 +21,7 @@ interface ImageConfig {
   bgColor2: string;
   fgColor: string;
   text: string;
+  font: string;
   fontSize: string;
   fontWeight: string;
   fontStyle: string;
@@ -28,6 +29,9 @@ interface ImageConfig {
   customY: string;
   border: number;
   borderColor: string;
+  radius: number;
+  shadow: number;
+  shadowColor: string;
   quality: number;
   gradientEnabled: boolean;
 }
@@ -62,6 +66,7 @@ export default function ImageBuilder() {
     bgColor2: '',
     fgColor: '333333',
     text: '',
+    font: '',
     fontSize: '',
     fontWeight: 'normal',
     fontStyle: 'normal',
@@ -69,6 +74,9 @@ export default function ImageBuilder() {
     customY: '',
     border: 0,
     borderColor: '',
+    radius: 0,
+    shadow: 0,
+    shadowColor: '000000',
     quality: 90,
     gradientEnabled: false,
   });
@@ -93,6 +101,7 @@ export default function ImageBuilder() {
 
     const params = new URLSearchParams();
     if (cfg.text) params.set('text', cfg.text);
+    if (cfg.font) params.set('font', cfg.font);
     if (cfg.fontSize) params.set('size', cfg.fontSize);
     if (cfg.fontWeight !== 'normal') params.set('weight', cfg.fontWeight);
     if (cfg.fontStyle !== 'normal') params.set('style', cfg.fontStyle);
@@ -100,6 +109,11 @@ export default function ImageBuilder() {
     if (cfg.align === 'custom' && cfg.customY) params.set('y', cfg.customY);
     if (cfg.border > 0) params.set('border', cfg.border.toString());
     if (cfg.borderColor) params.set('borderColor', cfg.borderColor);
+    if (cfg.radius > 0) params.set('radius', cfg.radius.toString());
+    if (cfg.shadow > 0) {
+      params.set('shadow', cfg.shadow.toString());
+      if (cfg.shadowColor !== '000000') params.set('shadowColor', cfg.shadowColor);
+    }
     if (cfg.format === 'jpeg' && cfg.quality !== 90) {
       params.set('quality', cfg.quality.toString());
     }
@@ -369,6 +383,45 @@ export default function ImageBuilder() {
                 />
               </Field>
 
+              {/* Font Family */}
+              <Field>
+                <Label>Font</Label>
+                <Select
+                  value={config.font}
+                  onChange={(e) => updateConfig({ font: e.target.value })}
+                >
+                  <option value="">Default (Sans-Serif)</option>
+                  <optgroup label="Sans-Serif">
+                    <option value="inter">Inter</option>
+                    <option value="roboto">Roboto</option>
+                    <option value="open-sans">Open Sans</option>
+                    <option value="lato">Lato</option>
+                    <option value="montserrat">Montserrat</option>
+                    <option value="poppins">Poppins</option>
+                    <option value="raleway">Raleway</option>
+                    <option value="nunito">Nunito</option>
+                  </optgroup>
+                  <optgroup label="Serif">
+                    <option value="playfair-display">Playfair Display</option>
+                    <option value="merriweather">Merriweather</option>
+                    <option value="lora">Lora</option>
+                    <option value="roboto-slab">Roboto Slab</option>
+                  </optgroup>
+                  <optgroup label="Monospace">
+                    <option value="roboto-mono">Roboto Mono</option>
+                    <option value="source-code-pro">Source Code Pro</option>
+                    <option value="fira-code">Fira Code</option>
+                    <option value="jetbrains-mono">JetBrains Mono</option>
+                  </optgroup>
+                  <optgroup label="Display">
+                    <option value="bebas-neue">Bebas Neue</option>
+                    <option value="lobster">Lobster</option>
+                    <option value="pacifico">Pacifico</option>
+                    <option value="dancing-script">Dancing Script</option>
+                  </optgroup>
+                </Select>
+              </Field>
+
               {/* Font Settings */}
               <div className="grid grid-cols-2 gap-4">
                 <Field>
@@ -444,6 +497,51 @@ export default function ImageBuilder() {
               {showAdvanced && (
                 <>
                   <Field>
+                    <Label>Border Radius: {config.radius}px</Label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={config.radius}
+                      onChange={(e) => updateConfig({ radius: parseInt(e.target.value) })}
+                      className="w-full mt-3 cursor-pointer"
+                    />
+                  </Field>
+
+                  <Field>
+                    <Label>Shadow Size: {config.shadow}px</Label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="50"
+                      value={config.shadow}
+                      onChange={(e) => updateConfig({ shadow: parseInt(e.target.value) })}
+                      className="w-full mt-3 cursor-pointer"
+                    />
+                  </Field>
+
+                  {config.shadow > 0 && (
+                    <Field>
+                      <Label>Shadow Color</Label>
+                      <div className="flex gap-2 mt-3">
+                        <input
+                          type="color"
+                          value={`#${config.shadowColor}`}
+                          onChange={(e) => updateConfig({ shadowColor: e.target.value.slice(1) })}
+                          className="w-12 h-10 rounded-lg cursor-pointer border border-zinc-300 dark:border-zinc-600"
+                        />
+                        <Input
+                          type="text"
+                          value={config.shadowColor}
+                          onChange={(e) => updateConfig({ shadowColor: e.target.value.replace('#', '') })}
+                          className="flex-1 font-mono text-sm"
+                          placeholder="000000"
+                        />
+                      </div>
+                    </Field>
+                  )}
+
+                  <Field>
                     <Label>Border Width: {config.border}px</Label>
                     <input
                       type="range"
@@ -512,7 +610,7 @@ export default function ImageBuilder() {
               <Field>
                 <Label>Generated URL</Label>
                 <code className="block bg-zinc-900 dark:bg-zinc-950 text-green-400 p-3 rounded-lg text-xs overflow-x-auto font-mono mt-3">
-                  {imageUrl}
+                  https://imges.dev{imageUrl}
                 </code>
               </Field>
 
