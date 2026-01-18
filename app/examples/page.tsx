@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { CheckIcon, ClipboardIcon } from "@heroicons/react/24/outline";
+import { Heading, Subheading } from '../components/catalyst/heading';
+import { Text } from '../components/catalyst/text';
+import { Badge } from '../components/catalyst/badge';
+import { Button } from '../components/catalyst/button';
 
 interface Example {
   title: string;
@@ -127,16 +131,21 @@ export default function ExamplesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       <div className="mx-auto max-w-7xl px-6 py-16">
         {/* Header */}
         <div className="mb-12 text-center">
-          <h1 className="mb-4 text-5xl font-bold text-slate-900">
+          <div className="mb-4">
+            <a href="/" className="text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
+              ← Back to Home
+            </a>
+          </div>
+          <Heading className="mb-4">
             Example Gallery
-          </h1>
-          <p className="text-xl text-slate-600">
+          </Heading>
+          <Text className="text-xl">
             Get inspired with these creative placeholder examples
-          </p>
+          </Text>
         </div>
 
         {/* Category Filter */}
@@ -147,8 +156,8 @@ export default function ExamplesPage() {
               onClick={() => setSelectedCategory(category)}
               className={`rounded-full px-6 py-2 font-medium transition-all ${
                 selectedCategory === category
-                  ? "bg-blue-600 text-white shadow-lg"
-                  : "bg-white text-slate-700 hover:bg-slate-100"
+                  ? "bg-blue-600 text-white shadow-lg dark:bg-blue-500"
+                  : "bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
               }`}
             >
               {category}
@@ -161,10 +170,10 @@ export default function ExamplesPage() {
           {filteredExamples.map((example, index) => (
             <div
               key={index}
-              className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg transition-all hover:shadow-xl"
+              className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg transition-all hover:shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
             >
               {/* Image Preview */}
-              <div className="relative aspect-video overflow-hidden bg-slate-100">
+              <div className="relative aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-800">
                 <img
                   src={example.url}
                   alt={example.title}
@@ -172,32 +181,33 @@ export default function ExamplesPage() {
                   loading="lazy"
                 />
                 <div className="absolute right-2 top-2">
-                  <span className="rounded-full bg-black/50 px-3 py-1 text-xs font-medium text-white">
+                  <Badge color="zinc" className="bg-black/50 text-white">
                     {example.category}
-                  </span>
+                  </Badge>
                 </div>
               </div>
 
               {/* Card Content */}
               <div className="p-6">
-                <h3 className="mb-2 text-xl font-semibold text-slate-900">
+                <Subheading level={3} className="mb-2">
                   {example.title}
-                </h3>
-                <p className="mb-4 text-sm text-slate-600">
+                </Subheading>
+                <Text className="mb-4 text-sm">
                   {example.description}
-                </p>
+                </Text>
 
                 {/* URL Display */}
-                <div className="mb-3 overflow-hidden rounded-lg bg-slate-50 p-3">
-                  <code className="block overflow-x-auto text-xs text-slate-700">
+                <div className="mb-3 overflow-hidden rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
+                  <code className="block overflow-x-auto text-xs text-zinc-700 dark:text-zinc-300">
                     imges.dev{example.url}
                   </code>
                 </div>
 
                 {/* Copy Button */}
-                <button
+                <Button
                   onClick={() => copyToClipboard(example.url)}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-all hover:bg-blue-700"
+                  color="blue"
+                  className="w-full"
                 >
                   {copiedUrl === example.url ? (
                     <>
@@ -210,23 +220,23 @@ export default function ExamplesPage() {
                       Copy URL
                     </>
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           ))}
         </div>
 
         {/* Footer Links */}
-        <div className="mt-16 flex justify-center gap-8 border-t border-slate-200 pt-8 text-center">
+        <div className="mt-16 flex justify-center gap-8 border-t border-zinc-200 pt-8 text-center dark:border-zinc-700">
           <a
             href="/docs"
-            className="text-blue-600 hover:text-blue-700 hover:underline"
+            className="text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
           >
             View API Documentation
           </a>
           <a
             href="/"
-            className="text-blue-600 hover:text-blue-700 hover:underline"
+            className="text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
           >
             Back to Home
           </a>
