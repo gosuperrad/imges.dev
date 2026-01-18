@@ -266,6 +266,23 @@ async function drawTextWithEmojis(
   }
 }
 
+function createErrorResponse(message: string, status: number = 400) {
+  return new NextResponse(
+    JSON.stringify({
+      error: message,
+      docs: "https://imges.dev/docs",
+      example: "https://imges.dev/800x600/3b82f6/ffffff?text=Hello"
+    }),
+    {
+      status,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache",
+      },
+    }
+  );
+}
+
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ params: string[] }> }
@@ -275,35 +292,75 @@ export async function GET(
   const imageParams = parseParams(urlParams);
 
   if (!imageParams) {
-    return new NextResponse(
-      "Invalid image parameters. Format: /[width]x[height]/[bg-color]/[fg-color]",
-      {
-        status: 400,
-        headers: { "Content-Type": "text/plain" },
-      }
+    return createErrorResponse(
+      "Invalid dimensions. Format: /[width]x[height] (e.g., /800x600). Max dimensions: 4000x4000."
     );
   }
 
   const searchParams = request.nextUrl.searchParams;
 
-  // Parse query parameters
+  // Parse and validate query parameters
   const text = searchParams.get("text") || `${imageParams.width} × ${imageParams.height}`;
   const font = searchParams.get("font") || "sans-serif";
   const fontWeight = searchParams.get("weight") || "normal";
   const fontStyle = searchParams.get("style") || "normal";
   const align = (searchParams.get("align") as "top" | "center" | "bottom" | "custom") || "center";
+  
+  // Validate align parameter
+  if (align && !["top", "center", "bottom", "custom"].includes(align)) {
+    return createErrorResponse(
+      `Invalid align parameter: "${align}". Must be one of: top, center, bottom, custom`
+    );
+  }
+  
   const customY = searchParams.get("y") ? parseInt(searchParams.get("y")!) : undefined;
   const border = searchParams.get("border") ? parseInt(searchParams.get("border")!) : undefined;
+  
+  // Validate border
+  if (border !== undefined && (isNaN(border) || border < 0 || border > 100)) {
+    return createErrorResponse(
+      `Invalid border width: "${searchParams.get("border")}". Must be a number between 0 and 100.`
+    );
+  }
+  
   const borderColor = searchParams.get("borderColor") || imageParams.fgColor;
   const blur = searchParams.get("blur") ? parseInt(searchParams.get("blur")!) : undefined;
+  
+  // Validate blur
+  if (blur !== undefined && (isNaN(blur) || blur < 0 || blur > 50)) {
+    return createErrorResponse(
+      `Invalid blur amount: "${searchParams.get("blur")}". Must be a number between 0 and 50.`
+    );
+  }
+  
   const quality = searchParams.get("quality") ? parseInt(searchParams.get("quality")!) : 90;
+  
+  // Validate quality
+  if (isNaN(quality) || quality < 1 || quality > 100) {
+    return createErrorResponse(
+      `Invalid quality: "${searchParams.get("quality")}". Must be a number between 1 and 100.`
+    );
+  }
+  
   const format = (searchParams.get("format") as "png" | "jpeg" | "webp") || imageParams.format;
+  
+  // Validate format
+  if (format && !["png", "jpeg", "webp"].includes(format)) {
+    return createErrorResponse(
+      `Invalid format: "${format}". Must be one of: png, jpeg, webp`
+    );
+  }
   
   // Font size - can be specified or auto-calculated
   let fontSize: number | undefined;
   const fontSizeParam = searchParams.get("size");
   if (fontSizeParam) {
     fontSize = parseInt(fontSizeParam);
+    if (isNaN(fontSize) || fontSize < 1 || fontSize > 500) {
+      return createErrorResponse(
+        `Invalid font size: "${fontSizeParam}". Must be a number between 1 and 500.`
+      );
+    }
   }
 
   try {
@@ -405,10 +462,17 @@ export async function GET(
       headers: {
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=31536000, immutable",
+        "X-Image-Width": actualWidth.toString(),
+        "X-Image-Height": actualHeight.toString(),
+        "X-Image-Format": format,
       },
     });
   } catch (error) {
     console.error("Error generating image:", error);
-    return new NextResponse("Error generating image", { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return createErrorResponse(
+      `Failed to generate image: ${errorMessage}`,
+      500
+    );
   }
 }
