@@ -148,6 +148,18 @@ const examples: Example[] = [
     category: "Typography"
   },
   {
+    title: "Modern Sans-Serif",
+    description: "Clean Poppins font for modern design",
+    url: "/800x600/0f172a/f8fafc?text=Modern%20Typography&font=poppins&size=60&weight=bold",
+    category: "Typography"
+  },
+  {
+    title: "Vintage Serif",
+    description: "Lora font with warm vintage feel",
+    url: "/800x600/fef3c7/92400e?text=Vintage%20Style&font=lora&size=65&style=italic",
+    category: "Typography"
+  },
+  {
     title: "Rounded Shadow Combo",
     description: "Combined radius and shadow effects",
     url: "/700x500/6366f1/ffffff?text=Premium%20Card&radius=30&shadow=20&shadowColor=4338ca&size=60&weight=bold",

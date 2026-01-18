@@ -300,6 +300,47 @@ export default function DocsPage() {
                 className="w-full rounded border border-zinc-200 dark:border-zinc-700"
               />
             </div>
+
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+              <Subheading level={3} className="mb-2">
+                Font Showcase
+              </Subheading>
+              <Text className="mb-4">
+                Preview of available custom fonts from Google Fonts
+              </Text>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Text className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">Sans-Serif</Text>
+                  <div className="space-y-2">
+                    <img src="/500x80/f8fafc/1e293b?text=Inter&font=inter&size=32" alt="Inter" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
+                    <img src="/500x80/f8fafc/1e293b?text=Poppins&font=poppins&size=32" alt="Poppins" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
+                    <img src="/500x80/f8fafc/1e293b?text=Montserrat&font=montserrat&size=32" alt="Montserrat" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
+                  </div>
+                </div>
+                <div>
+                  <Text className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">Serif</Text>
+                  <div className="space-y-2">
+                    <img src="/500x80/f8fafc/1e293b?text=Playfair%20Display&font=playfair-display&size=32" alt="Playfair Display" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
+                    <img src="/500x80/f8fafc/1e293b?text=Merriweather&font=merriweather&size=32" alt="Merriweather" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
+                    <img src="/500x80/f8fafc/1e293b?text=Lora&font=lora&size=32" alt="Lora" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
+                  </div>
+                </div>
+                <div>
+                  <Text className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">Monospace</Text>
+                  <div className="space-y-2">
+                    <img src="/500x80/282a36/50fa7b?text=Fira%20Code&font=fira-code&size=28" alt="Fira Code" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
+                    <img src="/500x80/282a36/50fa7b?text=JetBrains%20Mono&font=jetbrains-mono&size=28" alt="JetBrains Mono" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
+                  </div>
+                </div>
+                <div>
+                  <Text className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">Display</Text>
+                  <div className="space-y-2">
+                    <img src="/500x80/f8fafc/1e293b?text=BEBAS%20NEUE&font=bebas-neue&size=36" alt="Bebas Neue" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
+                    <img src="/500x80/fff5f5/d63031?text=Dancing%20Script&font=dancing-script&size=36" alt="Dancing Script" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
