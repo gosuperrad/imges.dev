@@ -4,6 +4,9 @@ builder = "RAILPACK"
 [build.nixpacksPlan.phases.setup]
 nixPkgs = ["cairo", "pango", "libjpeg", "giflib", "librsvg", "pixman", "pkg-config"]
 
+[build.nixpacksPlan.phases.install]
+cmds = ["npm install --legacy-peer-deps"]
+
 [deploy]
 startCommand = "npm start"
 restartPolicyType = "ON_FAILURE"
