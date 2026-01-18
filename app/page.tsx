@@ -131,7 +131,7 @@ export default function Home() {
             <Heading level={2} className="mb-4 text-white">
               Ready to get started?
             </Heading>
-            <Text className="text-lg mb-8 text-blue-50">
+            <Text className="text-lg mb-8 text-white opacity-90">
               Check out the full documentation or browse the examples gallery
             </Text>
             <div className="flex flex-wrap justify-center gap-4">
