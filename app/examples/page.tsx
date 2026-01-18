@@ -111,6 +111,48 @@ const examples: Example[] = [
     url: "/800x600/000000/22d3ee?text=⚡%20NEON%20⚡&size=100&weight=bold",
     category: "Fun"
   },
+  {
+    title: "Rounded Card",
+    description: "Modern card with rounded corners",
+    url: "/600x400/3b82f6/ffffff?text=Rounded%20Card&radius=40&size=50&weight=bold",
+    category: "Design"
+  },
+  {
+    title: "Elegant Serif",
+    description: "Playfair Display font for elegance",
+    url: "/800x600/f8fafc/1e293b?text=Elegant%20Design&font=playfair-display&size=70",
+    category: "Typography"
+  },
+  {
+    title: "Code Block",
+    description: "Monospace font for technical content",
+    url: "/800x400/282a36/50fa7b?text=console.log('Hello')&font=fira-code&size=40",
+    category: "Typography"
+  },
+  {
+    title: "Shadow Effect",
+    description: "Drop shadow for depth",
+    url: "/600x400/ffffff/333333?text=Shadow%20Card&shadow=25&shadowColor=000000&radius=20&size=50",
+    category: "Effects"
+  },
+  {
+    title: "Display Font",
+    description: "Bold display font for impact",
+    url: "/800x600/ff6b6b/ffffff?text=BIG%20IMPACT&font=bebas-neue&size=100&weight=bold",
+    category: "Typography"
+  },
+  {
+    title: "Handwritten Style",
+    description: "Dancing Script for a personal touch",
+    url: "/800x600/fff5f5/d63031?text=Hand%20Written&font=dancing-script&size=80",
+    category: "Typography"
+  },
+  {
+    title: "Rounded Shadow Combo",
+    description: "Combined radius and shadow effects",
+    url: "/700x500/6366f1/ffffff?text=Premium%20Card&radius=30&shadow=20&shadowColor=4338ca&size=60&weight=bold",
+    category: "Effects"
+  },
 ];
 
 const categories = ["All", ...Array.from(new Set(examples.map(e => e.category)))];

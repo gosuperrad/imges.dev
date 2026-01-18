@@ -166,11 +166,54 @@ export default function DocsPage() {
               imageUrl="/800x600?text=Top&align=top"
             />
 
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+              <Subheading level={3} className="mb-2">
+                font
+              </Subheading>
+              <Text className="mb-3">
+                Custom font from Google Fonts library. Choose from 20+ popular fonts including Inter, Roboto, Playfair Display, and more.
+              </Text>
+              <div className="mb-3 rounded bg-zinc-50 p-3 dark:bg-zinc-800">
+                <Code className="text-sm">/800x600?text=Fancy%20Font&font=playfair-display</Code>
+              </div>
+              <img
+                src="/800x600?text=Fancy%20Font&font=playfair-display&size=60"
+                alt="Font example"
+                className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+                loading="lazy"
+              />
+              <details className="mt-4">
+                <summary className="cursor-pointer text-sm font-medium text-blue-600 dark:text-blue-400">
+                  View all supported fonts
+                </summary>
+                <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                  <div><strong>Sans-Serif:</strong> inter, roboto, open-sans, lato, montserrat, poppins, raleway, nunito</div>
+                  <div><strong>Serif:</strong> playfair-display, merriweather, lora, roboto-slab</div>
+                  <div><strong>Monospace:</strong> roboto-mono, source-code-pro, fira-code, jetbrains-mono</div>
+                  <div><strong>Display:</strong> bebas-neue, lobster, pacifico, dancing-script</div>
+                </div>
+              </details>
+            </div>
+
             <ParamCard
               name="border"
               description="Border width in pixels"
               example="/800x600?border=10&borderColor=ff0000"
               imageUrl="/800x600?border=10&borderColor=ff0000"
+            />
+
+            <ParamCard
+              name="radius"
+              description="Border radius in pixels for rounded corners"
+              example="/800x600?text=Rounded&radius=30"
+              imageUrl="/800x600/3b82f6/ffffff?text=Rounded&radius=30&size=60"
+            />
+
+            <ParamCard
+              name="shadow"
+              description="Shadow size in pixels (with optional shadowColor parameter)"
+              example="/800x600?text=Shadow&shadow=20&shadowColor=000000"
+              imageUrl="/800x600/ffffff/333333?text=Shadow&shadow=20&shadowColor=000000&size=60"
             />
 
             <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">

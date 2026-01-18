@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createCanvas, CanvasRenderingContext2D, loadImage } from "canvas";
 import sharp from "sharp";
 import { parse as parseEmoji } from "twemoji-parser";
+import { validateFont, loadGoogleFont } from "@/lib/fonts";
 
 interface ImageParams {
   width: number;
@@ -23,6 +24,9 @@ interface RenderOptions {
   border?: number;
   borderColor?: string;
   blur?: number;
+  radius?: number;
+  shadow?: number;
+  shadowColor?: string;
 }
 
 function generateRandomColor(): string {
@@ -168,6 +172,44 @@ function applyBlur(
   (ctx as any).filter = "none";
 }
 
+function drawRoundedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+
+function drawGradientRounded(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  color1: string,
+  color2: string,
+  radius: number
+) {
+  const gradient = ctx.createLinearGradient(0, 0, width, height);
+  gradient.addColorStop(0, normalizeColor(color1));
+  gradient.addColorStop(1, normalizeColor(color2));
+  ctx.fillStyle = gradient;
+  
+  drawRoundedRect(ctx, 0, 0, width, height, radius);
+  ctx.fill();
+}
+
 async function drawTextWithEmojis(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -301,7 +343,22 @@ export async function GET(
 
   // Parse and validate query parameters
   const text = searchParams.get("text") || `${imageParams.width} × ${imageParams.height}`;
-  const font = searchParams.get("font") || "sans-serif";
+  
+  // Validate and load custom font
+  const fontParam = searchParams.get("font");
+  const { fontKey, fontFamily } = validateFont(fontParam);
+  let font = fontFamily;
+  
+  // Load Google Font if requested
+  if (fontKey) {
+    try {
+      font = await loadGoogleFont(fontKey);
+    } catch (error) {
+      console.error("Failed to load Google Font:", error);
+      // font will already be set to the family name or fallback
+    }
+  }
+  
   const fontWeight = searchParams.get("weight") || "normal";
   const fontStyle = searchParams.get("style") || "normal";
   const align = (searchParams.get("align") as "top" | "center" | "bottom" | "custom") || "center";
@@ -332,6 +389,26 @@ export async function GET(
       `Invalid blur amount: "${searchParams.get("blur")}". Must be a number between 0 and 50.`
     );
   }
+  
+  const radius = searchParams.get("radius") ? parseInt(searchParams.get("radius")!) : undefined;
+  
+  // Validate radius
+  if (radius !== undefined && (isNaN(radius) || radius < 0 || radius > 500)) {
+    return createErrorResponse(
+      `Invalid radius: "${searchParams.get("radius")}". Must be a number between 0 and 500.`
+    );
+  }
+  
+  const shadow = searchParams.get("shadow") ? parseInt(searchParams.get("shadow")!) : undefined;
+  
+  // Validate shadow
+  if (shadow !== undefined && (isNaN(shadow) || shadow < 0 || shadow > 100)) {
+    return createErrorResponse(
+      `Invalid shadow size: "${searchParams.get("shadow")}". Must be a number between 0 and 100.`
+    );
+  }
+  
+  const shadowColor = searchParams.get("shadowColor") || "000000";
   
   const quality = searchParams.get("quality") ? parseInt(searchParams.get("quality")!) : 90;
   
@@ -372,13 +449,38 @@ export async function GET(
     const canvas = createCanvas(actualWidth, actualHeight);
     const ctx = canvas.getContext("2d");
 
-    // Fill background (gradient or solid)
-    if (imageParams.bgColor2) {
-      drawGradient(ctx, actualWidth, actualHeight, imageParams.bgColor, imageParams.bgColor2);
-    } else {
-      ctx.fillStyle = normalizeColor(imageParams.bgColor);
-      ctx.fillRect(0, 0, actualWidth, actualHeight);
+    // Apply shadow if specified
+    if (shadow && shadow > 0) {
+      ctx.shadowColor = normalizeColor(shadowColor);
+      ctx.shadowBlur = shadow * imageParams.scale;
+      ctx.shadowOffsetX = (shadow / 2) * imageParams.scale;
+      ctx.shadowOffsetY = (shadow / 2) * imageParams.scale;
     }
+
+    // Fill background (gradient or solid) with optional rounded corners
+    if (radius && radius > 0) {
+      const scaledRadius = radius * imageParams.scale;
+      if (imageParams.bgColor2) {
+        drawGradientRounded(ctx, actualWidth, actualHeight, imageParams.bgColor, imageParams.bgColor2, scaledRadius);
+      } else {
+        ctx.fillStyle = normalizeColor(imageParams.bgColor);
+        drawRoundedRect(ctx, 0, 0, actualWidth, actualHeight, scaledRadius);
+        ctx.fill();
+      }
+    } else {
+      if (imageParams.bgColor2) {
+        drawGradient(ctx, actualWidth, actualHeight, imageParams.bgColor, imageParams.bgColor2);
+      } else {
+        ctx.fillStyle = normalizeColor(imageParams.bgColor);
+        ctx.fillRect(0, 0, actualWidth, actualHeight);
+      }
+    }
+
+    // Reset shadow for other elements
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
 
     // Apply blur effect to background if specified
     if (blur && blur > 0) {
@@ -390,12 +492,26 @@ export async function GET(
       const scaledBorder = border * imageParams.scale;
       ctx.strokeStyle = normalizeColor(borderColor);
       ctx.lineWidth = scaledBorder;
-      ctx.strokeRect(
-        scaledBorder / 2,
-        scaledBorder / 2,
-        actualWidth - scaledBorder,
-        actualHeight - scaledBorder
-      );
+      
+      if (radius && radius > 0) {
+        const scaledRadius = radius * imageParams.scale;
+        drawRoundedRect(
+          ctx,
+          scaledBorder / 2,
+          scaledBorder / 2,
+          actualWidth - scaledBorder,
+          actualHeight - scaledBorder,
+          scaledRadius
+        );
+        ctx.stroke();
+      } else {
+        ctx.strokeRect(
+          scaledBorder / 2,
+          scaledBorder / 2,
+          actualWidth - scaledBorder,
+          actualHeight - scaledBorder
+        );
+      }
     }
 
     // Calculate font size if not specified
