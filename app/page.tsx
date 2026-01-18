@@ -131,9 +131,9 @@ export default function Home() {
             <Heading level={2} className="mb-4 text-white">
               Ready to get started?
             </Heading>
-            <Text className="text-lg mb-8 text-white">
+            <p className="text-lg mb-8 text-white">
               Check out the full documentation or browse the examples gallery
-            </Text>
+            </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a
                 href="/docs"
