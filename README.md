@@ -65,6 +65,7 @@ This project is deployed on Railway with automatic deployments from the `main` b
 ### System Dependencies
 
 The following system libraries are required for canvas/sharp:
+
 - libcairo2-dev
 - libpango1.0-dev
 - libjpeg-dev
@@ -106,13 +107,10 @@ Visit http://localhost:3000 to use the interactive image builder.
 ## Contributing
 
 This project follows [Git Flow](./GIT_FLOW.md) branching model:
+
 - `main` - Production branch
 - `develop` - Integration branch
 - `feature/*` - Feature branches
 - `ci/*` - CI/CD related branches
 
 See [CHANGELOG.md](./CHANGELOG.md) for project history.
-
-## License
-
-MIT
