@@ -35,30 +35,6 @@ export const SUPPORTED_FONTS = {
 
 export type SupportedFontKey = keyof typeof SUPPORTED_FONTS;
 
-// Google Fonts API URLs for each font (Regular weight)
-const FONT_URLS: Record<SupportedFontKey, string> = {
-  "inter": "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2",
-  "roboto": "https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2",
-  "open-sans": "https://fonts.gstatic.com/s/opensans/v34/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4gaVI.woff2",
-  "lato": "https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjx4wXiWtFCc.woff2",
-  "montserrat": "https://fonts.gstatic.com/s/montserrat/v25/JTUSjIg1_i6t8kCHKm459Wlhyw.woff2",
-  "poppins": "https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2",
-  "raleway": "https://fonts.gstatic.com/s/raleway/v28/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVvaorCIPrE.woff2",
-  "nunito": "https://fonts.gstatic.com/s/nunito/v25/XRXI3I6Li01BKofiOc5wtlZ2di8HDLshdTQ3j77e.woff2",
-  "playfair-display": "https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQZNLo_U2r.woff2",
-  "merriweather": "https://fonts.gstatic.com/s/merriweather/v30/u-440qyriQwlOrhSvowK_l5-fCZMdeX3rsHo.woff2",
-  "lora": "https://fonts.gstatic.com/s/lora/v32/0QI6MX1D_JOuGQbT0gvTJPa787weuxJBkq0.woff2",
-  "roboto-slab": "https://fonts.gstatic.com/s/robotoslab/v24/BngbUXZYTXPIvIBgJJSb6s3BzlRRfKOFbvjojIWWaG5iddG-1A.woff2",
-  "roboto-mono": "https://fonts.gstatic.com/s/robotomono/v22/L0xuDF4xlVMF-BfR8bXMIhJHg45mwgGEFl0_3vuPQ--5Ip2sSQ.woff2",
-  "source-code-pro": "https://fonts.gstatic.com/s/sourcecodepro/v22/HI_diYsKILxRpg3hIP6sJ7fM7PqPMcMnZFqUwX28DMyQhM5hTXUcdJg.woff2",
-  "fira-code": "https://fonts.gstatic.com/s/firacode/v21/uU9eCBsR6Z2vfE9aq3bL0fxyUs4tcw4W_D1sJVD7MOzlojwUKaJO.woff2",
-  "jetbrains-mono": "https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxTOlOVkXg.woff2",
-  "bebas-neue": "https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXooxW5rygbi49c.woff2",
-  "lobster": "https://fonts.gstatic.com/s/lobster/v30/neILzCirqoswsqX9_oWsMqEzSJQ.woff2",
-  "pacifico": "https://fonts.gstatic.com/s/pacifico/v22/FwZY7-Qmy14u9lezJ-6H6MmBp0u-.woff2",
-  "dancing-script": "https://fonts.gstatic.com/s/dancingscript/v24/If2cXTr6YS-zF4S-kcSWSVi_sxjsohD9F50Ruu7BMSo3Sup5.woff2",
-};
-
 // Cache directory for downloaded fonts
 const CACHE_DIR = path.join(process.cwd(), ".next", "cache", "fonts");
 
@@ -66,12 +42,11 @@ const CACHE_DIR = path.join(process.cwd(), ".next", "cache", "fonts");
 const registeredFonts = new Set<string>();
 
 /**
- * Download a font file from Google Fonts
+ * Download a font file - fetch from Google Fonts CSS API and extract TTF URL
  */
 async function downloadFont(fontKey: SupportedFontKey): Promise<string> {
-  const url = FONT_URLS[fontKey];
   const fontName = SUPPORTED_FONTS[fontKey];
-  const filename = `${fontKey}.woff2`;
+  const filename = `${fontKey}.ttf`;
   const filepath = path.join(CACHE_DIR, filename);
 
   // Check if already cached
@@ -85,16 +60,46 @@ async function downloadFont(fontKey: SupportedFontKey): Promise<string> {
   // Ensure cache directory exists
   await fs.mkdir(CACHE_DIR, { recursive: true });
 
-  // Download the font
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to download font ${fontName}: ${response.statusText}`);
+  try {
+    // Get CSS from Google Fonts with a User-Agent that triggers TrueType format
+    // Android 4.4 and older browsers get TTF instead of WOFF2
+    const googleFontName = fontName.replace(/ /g, '+');
+    const cssUrl = `https://fonts.googleapis.com/css?family=${googleFontName}:400`;
+    
+    const cssResponse = await fetch(cssUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 4.4.2; Nexus 4 Build/KOT49H) AppleWebKit/537.36'
+      }
+    });
+
+    if (!cssResponse.ok) {
+      throw new Error(`Failed to fetch Google Fonts CSS: ${cssResponse.statusText}`);
+    }
+
+    const cssText = await cssResponse.text();
+    
+    // Extract the font URL - look for url() in the CSS
+    const urlMatch = cssText.match(/url\(([^)]+)\)/);
+    if (!urlMatch || !urlMatch[1]) {
+      throw new Error(`Could not find font URL in CSS for ${fontName}`);
+    }
+
+    const fontUrl = urlMatch[1].replace(/['"]/g, ''); // Remove quotes if any
+
+    // Download the actual font file
+    const fontResponse = await fetch(fontUrl);
+    if (!fontResponse.ok) {
+      throw new Error(`Failed to download font file: ${fontResponse.statusText}`);
+    }
+
+    const buffer = await fontResponse.arrayBuffer();
+    await fs.writeFile(filepath, Buffer.from(buffer));
+
+    return filepath;
+  } catch (error) {
+    console.error(`Error downloading font ${fontName}:`, error);
+    throw error;
   }
-
-  const buffer = await response.arrayBuffer();
-  await fs.writeFile(filepath, Buffer.from(buffer));
-
-  return filepath;
 }
 
 /**
