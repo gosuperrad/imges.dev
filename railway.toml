@@ -1,8 +1,8 @@
 [build]
-builder = "NIXPACKS"
+builder = "RAILPACK"
 
-[build.nixpacks]
-pkgs = ["cairo", "pango", "libjpeg", "giflib", "librsvg", "pixman", "pkg-config"]
+[build.nixpacksPlan.phases.setup]
+nixPkgs = ["cairo", "pango", "libjpeg", "giflib", "librsvg", "pixman", "pkg-config"]
 
 [deploy]
 startCommand = "npm start"
