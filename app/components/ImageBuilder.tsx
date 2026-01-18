@@ -610,7 +610,7 @@ export default function ImageBuilder() {
               <Field>
                 <Label>Generated URL</Label>
                 <code className="block bg-zinc-900 dark:bg-zinc-950 text-green-400 p-3 rounded-lg text-xs overflow-x-auto font-mono mt-3">
-                  {imageUrl}
+                  https://imges.dev{imageUrl}
                 </code>
               </Field>
 
