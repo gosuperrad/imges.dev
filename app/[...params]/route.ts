@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createCanvas, CanvasRenderingContext2D, loadImage } from "canvas";
 import sharp from "sharp";
 import { parse as parseEmoji } from "twemoji-parser";
+import { validateFont, loadGoogleFont } from "@/lib/fonts";
 
 interface ImageParams {
   width: number;
@@ -23,6 +24,12 @@ interface RenderOptions {
   border?: number;
   borderColor?: string;
   blur?: number;
+  radius?: number;
+  shadow?: number;
+  shadowColor?: string;
+  noise?: number;
+  pattern?: "dots" | "stripes" | "checkerboard" | "grid";
+  patternColor?: string;
 }
 
 function generateRandomColor(): string {
@@ -168,6 +175,135 @@ function applyBlur(
   (ctx as any).filter = "none";
 }
 
+function drawRoundedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+
+function drawGradientRounded(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  color1: string,
+  color2: string,
+  radius: number
+) {
+  const gradient = ctx.createLinearGradient(0, 0, width, height);
+  gradient.addColorStop(0, normalizeColor(color1));
+  gradient.addColorStop(1, normalizeColor(color2));
+  ctx.fillStyle = gradient;
+  
+  drawRoundedRect(ctx, 0, 0, width, height, radius);
+  ctx.fill();
+}
+
+function applyNoise(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  amount: number
+) {
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const data = imageData.data;
+  
+  // Apply noise to each pixel
+  for (let i = 0; i < data.length; i += 4) {
+    // Random noise value between -amount and +amount
+    const noise = (Math.random() - 0.5) * amount * 2;
+    data[i] = Math.max(0, Math.min(255, data[i] + noise));     // R
+    data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise)); // G
+    data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise)); // B
+    // Alpha channel (i + 3) remains unchanged
+  }
+  
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function drawPattern(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  pattern: "dots" | "stripes" | "checkerboard" | "grid",
+  color: string
+) {
+  ctx.fillStyle = normalizeColor(color);
+  ctx.strokeStyle = normalizeColor(color);
+  
+  const spacing = Math.min(width, height) / 20; // Adaptive spacing
+  
+  switch (pattern) {
+    case "dots":
+      // Draw dot pattern
+      for (let x = spacing / 2; x < width; x += spacing) {
+        for (let y = spacing / 2; y < height; y += spacing) {
+          ctx.beginPath();
+          ctx.arc(x, y, spacing / 8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      break;
+      
+    case "stripes":
+      // Draw diagonal stripes
+      ctx.lineWidth = spacing / 4;
+      for (let i = -height; i < width + height; i += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i + height, height);
+        ctx.stroke();
+      }
+      break;
+      
+    case "checkerboard":
+      // Draw checkerboard pattern
+      const squareSize = spacing;
+      for (let x = 0; x < width; x += squareSize) {
+        for (let y = 0; y < height; y += squareSize) {
+          // Alternate squares
+          if ((Math.floor(x / squareSize) + Math.floor(y / squareSize)) % 2 === 0) {
+            ctx.fillRect(x, y, squareSize, squareSize);
+          }
+        }
+      }
+      break;
+      
+    case "grid":
+      // Draw grid pattern
+      ctx.lineWidth = spacing / 20;
+      // Vertical lines
+      for (let x = 0; x <= width; x += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      // Horizontal lines
+      for (let y = 0; y <= height; y += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+      break;
+  }
+}
+
 async function drawTextWithEmojis(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -266,6 +402,23 @@ async function drawTextWithEmojis(
   }
 }
 
+function createErrorResponse(message: string, status: number = 400) {
+  return new NextResponse(
+    JSON.stringify({
+      error: message,
+      docs: "https://imges.dev/docs",
+      example: "https://imges.dev/800x600/3b82f6/ffffff?text=Hello"
+    }),
+    {
+      status,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache",
+      },
+    }
+  );
+}
+
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ params: string[] }> }
@@ -275,35 +428,130 @@ export async function GET(
   const imageParams = parseParams(urlParams);
 
   if (!imageParams) {
-    return new NextResponse(
-      "Invalid image parameters. Format: /[width]x[height]/[bg-color]/[fg-color]",
-      {
-        status: 400,
-        headers: { "Content-Type": "text/plain" },
-      }
+    return createErrorResponse(
+      "Invalid dimensions. Format: /[width]x[height] (e.g., /800x600). Max dimensions: 4000x4000."
     );
   }
 
   const searchParams = request.nextUrl.searchParams;
 
-  // Parse query parameters
+  // Parse and validate query parameters
   const text = searchParams.get("text") || `${imageParams.width} × ${imageParams.height}`;
-  const font = searchParams.get("font") || "sans-serif";
+  
+  // Validate and load custom font
+  const fontParam = searchParams.get("font");
+  const { fontKey, fontFamily } = validateFont(fontParam);
+  let font = fontFamily;
+  
+  // Load Google Font if requested
+  if (fontKey) {
+    try {
+      font = await loadGoogleFont(fontKey);
+    } catch (error) {
+      console.error("Failed to load Google Font:", error);
+      // font will already be set to the family name or fallback
+    }
+  }
+  
   const fontWeight = searchParams.get("weight") || "normal";
   const fontStyle = searchParams.get("style") || "normal";
   const align = (searchParams.get("align") as "top" | "center" | "bottom" | "custom") || "center";
+  
+  // Validate align parameter
+  if (align && !["top", "center", "bottom", "custom"].includes(align)) {
+    return createErrorResponse(
+      `Invalid align parameter: "${align}". Must be one of: top, center, bottom, custom`
+    );
+  }
+  
   const customY = searchParams.get("y") ? parseInt(searchParams.get("y")!) : undefined;
   const border = searchParams.get("border") ? parseInt(searchParams.get("border")!) : undefined;
+  
+  // Validate border
+  if (border !== undefined && (isNaN(border) || border < 0 || border > 100)) {
+    return createErrorResponse(
+      `Invalid border width: "${searchParams.get("border")}". Must be a number between 0 and 100.`
+    );
+  }
+  
   const borderColor = searchParams.get("borderColor") || imageParams.fgColor;
   const blur = searchParams.get("blur") ? parseInt(searchParams.get("blur")!) : undefined;
+  
+  // Validate blur
+  if (blur !== undefined && (isNaN(blur) || blur < 0 || blur > 50)) {
+    return createErrorResponse(
+      `Invalid blur amount: "${searchParams.get("blur")}". Must be a number between 0 and 50.`
+    );
+  }
+  
+  const radius = searchParams.get("radius") ? parseInt(searchParams.get("radius")!) : undefined;
+  
+  // Validate radius
+  if (radius !== undefined && (isNaN(radius) || radius < 0 || radius > 500)) {
+    return createErrorResponse(
+      `Invalid radius: "${searchParams.get("radius")}". Must be a number between 0 and 500.`
+    );
+  }
+  
+  const shadow = searchParams.get("shadow") ? parseInt(searchParams.get("shadow")!) : undefined;
+  
+  // Validate shadow
+  if (shadow !== undefined && (isNaN(shadow) || shadow < 0 || shadow > 100)) {
+    return createErrorResponse(
+      `Invalid shadow size: "${searchParams.get("shadow")}". Must be a number between 0 and 100.`
+    );
+  }
+  
+  const shadowColor = searchParams.get("shadowColor") || "000000";
+  
+  const noise = searchParams.get("noise") ? parseInt(searchParams.get("noise")!) : undefined;
+  
+  // Validate noise
+  if (noise !== undefined && (isNaN(noise) || noise < 0 || noise > 100)) {
+    return createErrorResponse(
+      `Invalid noise amount: "${searchParams.get("noise")}". Must be a number between 0 and 100.`
+    );
+  }
+  
+  const pattern = searchParams.get("pattern") as "dots" | "stripes" | "checkerboard" | "grid" | null;
+  
+  // Validate pattern
+  if (pattern && !["dots", "stripes", "checkerboard", "grid"].includes(pattern)) {
+    return createErrorResponse(
+      `Invalid pattern: "${pattern}". Must be one of: dots, stripes, checkerboard, grid`
+    );
+  }
+  
+  const patternColor = searchParams.get("patternColor") || imageParams.fgColor;
+  
   const quality = searchParams.get("quality") ? parseInt(searchParams.get("quality")!) : 90;
+  
+  // Validate quality
+  if (isNaN(quality) || quality < 1 || quality > 100) {
+    return createErrorResponse(
+      `Invalid quality: "${searchParams.get("quality")}". Must be a number between 1 and 100.`
+    );
+  }
+  
   const format = (searchParams.get("format") as "png" | "jpeg" | "webp") || imageParams.format;
+  
+  // Validate format
+  if (format && !["png", "jpeg", "webp"].includes(format)) {
+    return createErrorResponse(
+      `Invalid format: "${format}". Must be one of: png, jpeg, webp`
+    );
+  }
   
   // Font size - can be specified or auto-calculated
   let fontSize: number | undefined;
   const fontSizeParam = searchParams.get("size");
   if (fontSizeParam) {
     fontSize = parseInt(fontSizeParam);
+    if (isNaN(fontSize) || fontSize < 1 || fontSize > 500) {
+      return createErrorResponse(
+        `Invalid font size: "${fontSizeParam}". Must be a number between 1 and 500.`
+      );
+    }
   }
 
   try {
@@ -315,17 +563,52 @@ export async function GET(
     const canvas = createCanvas(actualWidth, actualHeight);
     const ctx = canvas.getContext("2d");
 
-    // Fill background (gradient or solid)
-    if (imageParams.bgColor2) {
-      drawGradient(ctx, actualWidth, actualHeight, imageParams.bgColor, imageParams.bgColor2);
-    } else {
-      ctx.fillStyle = normalizeColor(imageParams.bgColor);
-      ctx.fillRect(0, 0, actualWidth, actualHeight);
+    // Apply shadow if specified
+    if (shadow && shadow > 0) {
+      ctx.shadowColor = normalizeColor(shadowColor);
+      ctx.shadowBlur = shadow * imageParams.scale;
+      ctx.shadowOffsetX = (shadow / 2) * imageParams.scale;
+      ctx.shadowOffsetY = (shadow / 2) * imageParams.scale;
     }
+
+    // Fill background (gradient or solid) with optional rounded corners
+    if (radius && radius > 0) {
+      const scaledRadius = radius * imageParams.scale;
+      if (imageParams.bgColor2) {
+        drawGradientRounded(ctx, actualWidth, actualHeight, imageParams.bgColor, imageParams.bgColor2, scaledRadius);
+      } else {
+        ctx.fillStyle = normalizeColor(imageParams.bgColor);
+        drawRoundedRect(ctx, 0, 0, actualWidth, actualHeight, scaledRadius);
+        ctx.fill();
+      }
+    } else {
+      if (imageParams.bgColor2) {
+        drawGradient(ctx, actualWidth, actualHeight, imageParams.bgColor, imageParams.bgColor2);
+      } else {
+        ctx.fillStyle = normalizeColor(imageParams.bgColor);
+        ctx.fillRect(0, 0, actualWidth, actualHeight);
+      }
+    }
+
+    // Reset shadow for other elements
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
 
     // Apply blur effect to background if specified
     if (blur && blur > 0) {
       applyBlur(ctx, actualWidth, actualHeight, blur * imageParams.scale);
+    }
+
+    // Apply pattern if specified
+    if (pattern) {
+      drawPattern(ctx, actualWidth, actualHeight, pattern, patternColor);
+    }
+
+    // Apply noise/grain effect if specified
+    if (noise && noise > 0) {
+      applyNoise(ctx, actualWidth, actualHeight, noise);
     }
 
     // Draw border if specified
@@ -333,12 +616,26 @@ export async function GET(
       const scaledBorder = border * imageParams.scale;
       ctx.strokeStyle = normalizeColor(borderColor);
       ctx.lineWidth = scaledBorder;
-      ctx.strokeRect(
-        scaledBorder / 2,
-        scaledBorder / 2,
-        actualWidth - scaledBorder,
-        actualHeight - scaledBorder
-      );
+      
+      if (radius && radius > 0) {
+        const scaledRadius = radius * imageParams.scale;
+        drawRoundedRect(
+          ctx,
+          scaledBorder / 2,
+          scaledBorder / 2,
+          actualWidth - scaledBorder,
+          actualHeight - scaledBorder,
+          scaledRadius
+        );
+        ctx.stroke();
+      } else {
+        ctx.strokeRect(
+          scaledBorder / 2,
+          scaledBorder / 2,
+          actualWidth - scaledBorder,
+          actualHeight - scaledBorder
+        );
+      }
     }
 
     // Calculate font size if not specified
@@ -405,10 +702,17 @@ export async function GET(
       headers: {
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=31536000, immutable",
+        "X-Image-Width": actualWidth.toString(),
+        "X-Image-Height": actualHeight.toString(),
+        "X-Image-Format": format,
       },
     });
   } catch (error) {
     console.error("Error generating image:", error);
-    return new NextResponse("Error generating image", { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return createErrorResponse(
+      `Failed to generate image: ${errorMessage}`,
+      500
+    );
   }
 }
