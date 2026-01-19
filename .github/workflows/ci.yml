@@ -41,7 +41,9 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
         env:
-          DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+          # Synthetic, non-production database URL used only for Prisma client generation in CI.
+          # No actual database connection is established during this step.
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
 
       - name: Run TypeScript type check
         run: npx tsc --noEmit

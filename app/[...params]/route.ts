@@ -977,8 +977,8 @@ export async function GET(
       contentType = "image/png";
     }
 
-    // Track analytics (non-blocking)
-    trackImageEvent({
+    // Track analytics (non-blocking, fire-and-forget)
+    void trackImageEvent({
       width: imageParams.width,
       height: imageParams.height,
       bgColor: imageParams.bgColor,

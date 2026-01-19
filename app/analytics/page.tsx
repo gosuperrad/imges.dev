@@ -141,12 +141,14 @@ export default async function AnalyticsPage() {
                       <div 
                         className="bg-blue-500 h-2 rounded-full"
                         style={{ 
-                          width: `${(item.count / totalEvents) * 100}%` 
+                          width: totalEvents > 0
+                            ? `${(item.count / totalEvents) * 100}%`
+                            : "0%"
                         }}
                       />
                     </div>
                     <span className="text-sm text-gray-500 w-12 text-right">
-                      {((item.count / totalEvents) * 100).toFixed(1)}%
+                      {(totalEvents > 0 ? (item.count / totalEvents) * 100 : 0).toFixed(1)}%
                     </span>
                   </div>
                 </div>

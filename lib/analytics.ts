@@ -13,7 +13,7 @@ interface AnalyticsEventData {
   hasPattern?: boolean;
   hasGradient?: boolean;
   hasCustomFont?: boolean;
-  queryParams?: Record<string, any>;
+  queryParams?: Record<string, unknown>;
   userAgent?: string;
   referrer?: string;
 }
@@ -46,8 +46,8 @@ export async function trackImageEvent(data: AnalyticsEventData): Promise<void> {
         hasGradient: data.hasGradient ?? false,
         hasCustomFont: data.hasCustomFont ?? false,
         queryParams: data.queryParams ? (data.queryParams as Prisma.InputJsonValue) : undefined,
-        userAgent: data.userAgent,
-        referrer: data.referrer,
+        userAgent: data.userAgent?.substring(0, 500), // Truncate to 500 chars
+        referrer: data.referrer?.substring(0, 500), // Truncate to 500 chars
       },
     });
   } catch (error) {
