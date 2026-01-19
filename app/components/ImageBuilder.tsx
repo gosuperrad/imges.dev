@@ -749,6 +749,35 @@ export default function ImageBuilder() {
             </div>
           </div>
         </div>
+
+        {/* Footer */}
+        <footer className="mt-12 pt-8 border-t border-zinc-800 text-center">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-zinc-500">
+            <a href="/docs" className="hover:text-zinc-300 transition-colors">
+              Documentation
+            </a>
+            <span className="text-zinc-700">•</span>
+            <a href="/examples" className="hover:text-zinc-300 transition-colors">
+              Examples
+            </a>
+            <span className="text-zinc-700">•</span>
+            <a href="/privacy" className="hover:text-zinc-300 transition-colors">
+              Privacy Policy
+            </a>
+            <span className="text-zinc-700">•</span>
+            <a 
+              href="https://github.com/gosuperrad/imges.dev" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-zinc-300 transition-colors"
+            >
+              GitHub
+            </a>
+          </div>
+          <p className="mt-4 text-xs text-zinc-600">
+            © 2026 imges.dev. Free placeholder image generator.
+          </p>
+        </footer>
       </main>
     </div>
   );

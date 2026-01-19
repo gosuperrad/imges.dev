@@ -833,6 +833,55 @@ export async function GET(
     fontSize = parseInt(fontSizeParam);
   }
 
+  // Resource and complexity validation
+  const actualPixels = imageParams.width * imageParams.height * (imageParams.scale * imageParams.scale);
+  const MAX_PIXELS = 4_000_000; // 4 megapixels (e.g., 2000x2000)
+
+  if (actualPixels > MAX_PIXELS) {
+    return createErrorResponse({
+      field: "dimensions",
+      message: "Total pixel count exceeds maximum (including scale multiplier)",
+      received: `${imageParams.width}x${imageParams.height}@${imageParams.scale}x = ${actualPixels.toLocaleString()} pixels`,
+      expected: `Maximum ${MAX_PIXELS.toLocaleString()} pixels`,
+      suggestion: `Reduce dimensions or scale. Try: /${Math.floor(Math.sqrt(MAX_PIXELS / imageParams.scale / imageParams.scale))}x${Math.floor(Math.sqrt(MAX_PIXELS / imageParams.scale / imageParams.scale))}@${imageParams.scale}x`
+    });
+  }
+
+  // Calculate complexity score (prevents resource exhaustion from multiple expensive effects)
+  let complexityScore = actualPixels / 1_000_000; // Base score from pixel count
+  if (blur && blur > 0) complexityScore += blur / 10; // Blur is expensive
+  if (noise && noise > 0) complexityScore += noise / 20;
+  if (shadow && shadow > 0) complexityScore += shadow / 20;
+  if (pattern) complexityScore += 2; // Pattern overlay adds complexity
+  if (fontKey) complexityScore += 1; // Custom font download/rendering
+  if (imageParams.bgColor2) complexityScore += 0.5; // Gradient rendering
+
+  const MAX_COMPLEXITY = 15;
+  if (complexityScore > MAX_COMPLEXITY) {
+    return createErrorResponse({
+      field: "complexity",
+      message: "Request too complex - combination of size and effects exceeds limits",
+      received: `Complexity score: ${complexityScore.toFixed(1)}`,
+      expected: `Maximum complexity score: ${MAX_COMPLEXITY}`,
+      suggestion: "Reduce image dimensions, scale factor, or number of effects (blur, noise, shadow, pattern)"
+    });
+  }
+
+  // Validate text length
+  const MAX_TEXT_LENGTH = 1000;
+  if (text && text.length > MAX_TEXT_LENGTH) {
+    return createErrorResponse({
+      field: "text",
+      message: "Text parameter too long",
+      received: `${text.length} characters`,
+      expected: `Maximum ${MAX_TEXT_LENGTH} characters`,
+      suggestion: "Reduce text length or split into multiple images"
+    });
+  }
+
+  // Sanitize text (remove control characters except newline and tab)
+  const sanitizedText = text ? text.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, "") : text;
+
   try {
     // Calculate actual dimensions with scale
     const actualWidth = imageParams.width * imageParams.scale;
@@ -925,7 +974,7 @@ export async function GET(
     }
 
     // Draw text (supports multiple lines with \n)
-    const lines = text.split("\\n");
+    const lines = sanitizedText.split("\\n");
     ctx.fillStyle = normalizeColor(imageParams.fgColor);
     ctx.textAlign = "center";
     ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${font}`;
