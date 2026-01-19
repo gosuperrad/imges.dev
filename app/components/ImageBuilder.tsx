@@ -1,16 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Button } from './catalyst/button';
 import { Input } from './catalyst/input';
 import { Textarea } from './catalyst/textarea';
 import { Field, Label, Description, Fieldset, FieldGroup } from './catalyst/fieldset';
 import { Select } from './catalyst/select';
 import { Switch, SwitchField } from './catalyst/switch';
-import { Heading } from './catalyst/heading';
+import { Heading, Subheading } from './catalyst/heading';
 import { Text } from './catalyst/text';
-import { Badge } from './catalyst/badge';
-import { ArrowDownTrayIcon, LinkIcon, SparklesIcon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
+import { Divider } from './catalyst/divider';
+import { Accordion, AccordionItem } from './catalyst/accordion';
+import { ColorInput } from './catalyst/color-input';
+import { ArrowDownTrayIcon, LinkIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/16/solid';
 
 interface ImageConfig {
   width: number;
@@ -87,8 +90,10 @@ export default function ImageBuilder() {
     gradientEnabled: false,
   });
 
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   const generateUrl = (cfg: ImageConfig): string => {
     let path = `/${cfg.width}x${cfg.height}`;
@@ -174,12 +179,6 @@ export default function ImageBuilder() {
     return hslToHex(hue, saturation, lightness);
   };
 
-  const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(imageUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const downloadImage = () => {
     const link = document.createElement('a');
     link.href = imageUrl;
@@ -187,517 +186,563 @@ export default function ImageBuilder() {
     link.click();
   };
 
+  const copyUrlToClipboard = () => {
+    const fullUrl = `${window.location.origin}${imageUrl}`;
+    navigator.clipboard.writeText(fullUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + K: Copy URL
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        copyUrlToClipboard();
+      }
+      // Cmd/Ctrl + D: Download image
+      if ((e.metaKey || e.ctrlKey) && e.key === 'd') {
+        e.preventDefault();
+        downloadImage();
+      }
+      // Cmd/Ctrl + R: Randomize background color
+      if ((e.metaKey || e.ctrlKey) && e.key === 'r') {
+        e.preventDefault();
+        updateConfig({ bgColor: generateRandomColor() });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [imageUrl, config]);
+
+  // Reset loading state when URL changes
+  useEffect(() => {
+    setImageLoading(true);
+    setImageError(false);
+  }, [imageUrl]);
+
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg p-8 mb-12 border border-zinc-200 dark:border-zinc-800">
-      <div className="text-center mb-8">
-        <Heading level={2}>Image Builder</Heading>
-        <Text className="mt-2">Create custom placeholder images with extensive customization options</Text>
-      </div>
+    <div className="flex min-h-screen bg-zinc-950">
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-zinc-900 rounded-lg shadow-lg border border-zinc-800"
+      >
+        {sidebarOpen ? <XMarkIcon className="w-6 h-6 text-white" /> : <Bars3Icon className="w-6 h-6 text-white" />}
+      </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        {/* Left Column - Controls */}
-        <div className="lg:col-span-2">
-          <Fieldset>
-            <FieldGroup>
-              {/* Size Presets */}
-              <Field>
-                <Label>Quick Presets</Label>
-                <div className="grid grid-cols-2 gap-2 mt-3">
-                  {SIZE_PRESETS.map((preset) => (
-                    <button
-                      key={preset.name}
-                      onClick={() => applyPreset(preset)}
-                      className="px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg text-sm transition-colors border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 cursor-pointer"
-                    >
-                      {preset.name}
-                      <span className="block text-xs text-zinc-500 dark:text-zinc-400">{preset.width}×{preset.height}</span>
-                    </button>
-                  ))}
-                </div>
-              </Field>
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-30"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-              {/* Dimensions */}
-              <div className="grid grid-cols-2 gap-4">
-                <Field>
-                  <Label>Width</Label>
-                  <Input
-                    type="number"
-                    value={config.width.toString()}
-                    onChange={(e) => updateConfig({ width: parseInt(e.target.value) || 0 })}
-                    min={1}
-                    max={4000}
-                  />
-                </Field>
-                <Field>
-                  <Label>Height</Label>
-                  <Input
-                    type="number"
-                    value={config.height.toString()}
-                    onChange={(e) => updateConfig({ height: parseInt(e.target.value) || 0 })}
-                    min={1}
-                    max={4000}
-                  />
-                </Field>
+      {/* Fixed Sidebar */}
+      <aside className={`scrollbar-hide fixed left-0 top-0 h-screen w-80 overflow-y-auto bg-zinc-950 z-40 transition-transform duration-300 lg:translate-x-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="p-6 pt-16 lg:pt-6">
+          {/* Branding */}
+          <div className="mb-8">
+            <Link href="/" className="block group">
+              <Heading level={1} className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                imges.dev
+              </Heading>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="h-px flex-1 bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-pink-500/50"></div>
               </div>
+            </Link>
+            <Text className="mt-3 text-sm text-zinc-400 font-medium">
+              Image Builder
+            </Text>
+          </div>
 
-              {/* Scale & Format */}
-              <div className="grid grid-cols-2 gap-4">
-                <Field>
-                  <Label>Scale</Label>
-                  <Select
-                    value={config.scale.toString()}
-                    onChange={(e) => updateConfig({ scale: parseInt(e.target.value) })}
-                  >
-                    <option value="1">@1x</option>
-                    <option value="2">@2x</option>
-                    <option value="3">@3x</option>
-                  </Select>
-                </Field>
-                <Field>
-                  <Label>Format</Label>
-                  <Select
-                    value={config.format}
-                    onChange={(e) => updateConfig({ format: e.target.value as any })}
-                  >
-                    <option value="png">PNG</option>
-                    <option value="jpeg">JPEG</option>
-                    <option value="webp">WebP</option>
-                  </Select>
-                </Field>
-              </div>
+          {/* Navigation Links */}
+          <div className="flex gap-2 mb-6">
+            <Link
+              href="/docs"
+              className="flex-1 text-center px-3 py-2 text-sm font-medium rounded-lg bg-blue-950 text-blue-300 hover:bg-blue-900 transition-colors"
+              onClick={() => setSidebarOpen(false)}
+            >
+              API Docs
+            </Link>
+            <Link
+              href="/examples"
+              className="flex-1 text-center px-3 py-2 text-sm font-medium rounded-lg bg-purple-950 text-purple-300 hover:bg-purple-900 transition-colors"
+              onClick={() => setSidebarOpen(false)}
+            >
+              Examples
+            </Link>
+          </div>
 
-              {/* Color Presets */}
-              <Field>
-                <Label>Color Presets</Label>
-                <div className="grid grid-cols-4 gap-2 mt-3">
-                  {COLOR_PRESETS.map((preset) => (
-                    <button
-                      key={preset.name}
-                      onClick={() => applyColorPreset(preset)}
-                      className="group relative aspect-square rounded-lg overflow-hidden border-2 border-zinc-300 dark:border-zinc-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors cursor-pointer"
-                      style={{
-                        background: preset.bg2
-                          ? `linear-gradient(135deg, #${preset.bg} 0%, #${preset.bg2} 100%)`
-                          : `#${preset.bg}`,
-                      }}
-                    >
-                      <span className="absolute inset-0 flex items-center justify-center text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 text-white">
-                        {preset.name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </Field>
-
-              {/* Background Color */}
-              <Field>
-                <Label>Background Color</Label>
-                <div className="flex gap-2 mt-3">
-                  <input
-                    type="color"
-                    value={`#${config.bgColor}`}
-                    onChange={(e) => updateConfig({ bgColor: e.target.value.slice(1) })}
-                    className="w-12 h-10 rounded-lg cursor-pointer border border-zinc-300 dark:border-zinc-600"
-                  />
-                  <Input
-                    type="text"
-                    value={config.bgColor}
-                    onChange={(e) => updateConfig({ bgColor: e.target.value.replace('#', '') })}
-                    className="flex-1 font-mono text-sm"
-                    placeholder="cccccc"
-                  />
-                  <Button
-                    color="indigo"
-                    onClick={() => updateConfig({ bgColor: generateRandomColor() })}
-                  >
-                    <SparklesIcon />
-                    Random
-                  </Button>
-                </div>
-              </Field>
-
-              {/* Gradient Toggle */}
-              <SwitchField>
-                <Label>Enable Gradient</Label>
-                <Switch
-                  color="blue"
-                  checked={config.gradientEnabled}
-                  onChange={(checked) => updateConfig({ gradientEnabled: checked })}
+          {/* GitHub Link */}
+          <div className="mb-6">
+            <a
+              href="https://github.com/gosuperrad/imges.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg bg-zinc-900 text-zinc-300 hover:bg-zinc-800 transition-colors border border-zinc-800"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                className="h-5 w-5 fill-current"
+              >
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M12 2C6.477 2 2 6.463 2 11.97c0 4.404 2.865 8.14 6.839 9.458.5.092.682-.216.682-.48 0-.236-.008-.864-.013-1.695-2.782.602-3.369-1.337-3.369-1.337-.454-1.151-1.11-1.458-1.11-1.458-.908-.618.069-.606.069-.606 1.003.07 1.531 1.027 1.531 1.027.892 1.524 2.341 1.084 2.91.828.092-.643.35-1.083.636-1.332-2.22-.251-4.555-1.107-4.555-4.927 0-1.088.39-1.979 1.029-2.675-.103-.252-.446-1.266.098-2.638 0 0 .84-.268 2.75 1.022A9.607 9.607 0 0 1 12 6.82c.85.004 1.705.114 2.504.336 1.909-1.29 2.747-1.022 2.747-1.022.546 1.372.202 2.386.1 2.638.64.696 1.028 1.587 1.028 2.675 0 3.83-2.339 4.673-4.566 4.92.359.307.678.915.678 1.846 0 1.332-.012 2.407-.012 2.734 0 .267.18.577.688.48 3.97-1.32 6.833-5.054 6.833-9.458C22 6.463 17.522 2 12 2Z"
                 />
-              </SwitchField>
+              </svg>
+              View on GitHub
+            </a>
+          </div>
 
-              {/* Secondary Background Color */}
-              {config.gradientEnabled && (
+          <Divider className="mb-6" />
+
+          <Accordion>
+            {/* Dimensions Section */}
+            <AccordionItem title="Dimensions" defaultOpen={false}>
+              <FieldGroup>
                 <Field>
-                  <Label>Gradient Color 2</Label>
-                  <div className="flex gap-2 mt-3">
-                    <input
-                      type="color"
-                      value={`#${config.bgColor2 || 'ffffff'}`}
-                      onChange={(e) => updateConfig({ bgColor2: e.target.value.slice(1) })}
-                      className="w-12 h-10 rounded-lg cursor-pointer border border-zinc-300 dark:border-zinc-600"
-                    />
-                    <Input
-                      type="text"
-                      value={config.bgColor2}
-                      onChange={(e) => updateConfig({ bgColor2: e.target.value.replace('#', '') })}
-                      className="flex-1 font-mono text-sm"
-                      placeholder="ffffff"
-                    />
-                    <Button
-                      color="indigo"
-                      onClick={() => updateConfig({ bgColor2: generateRandomColor() })}
-                    >
-                      <SparklesIcon />
-                      Random
-                    </Button>
+                  <Label>Presets</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {SIZE_PRESETS.map((preset) => (
+                      <button
+                        key={preset.name}
+                        onClick={() => applyPreset(preset)}
+                        className="px-2 py-1.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded text-xs transition-colors border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 cursor-pointer"
+                      >
+                        {preset.name}
+                        <span className="block text-xs text-zinc-500 dark:text-zinc-400">{preset.width}×{preset.height}</span>
+                      </button>
+                    ))}
                   </div>
                 </Field>
-              )}
 
-              {/* Foreground Color */}
-              <Field>
-                <Label>Text Color</Label>
-                <div className="flex gap-2 mt-3">
-                  <input
-                    type="color"
-                    value={`#${config.fgColor}`}
-                    onChange={(e) => updateConfig({ fgColor: e.target.value.slice(1) })}
-                    className="w-12 h-10 rounded-lg cursor-pointer border border-zinc-300 dark:border-zinc-600"
-                  />
-                  <Input
-                    type="text"
-                    value={config.fgColor}
-                    onChange={(e) => updateConfig({ fgColor: e.target.value.replace('#', '') })}
-                    className="flex-1 font-mono text-sm"
-                    placeholder="333333"
-                  />
-                  <Button
-                    color="indigo"
-                    onClick={() => updateConfig({ fgColor: generateRandomColor() })}
-                  >
-                    <SparklesIcon />
-                    Random
-                  </Button>
+                <div className="grid grid-cols-2 gap-3 mt-3">
+                  <Field>
+                    <Label>Width</Label>
+                    <Input
+                      type="number"
+                      value={config.width.toString()}
+                      onChange={(e) => updateConfig({ width: parseInt(e.target.value) || 0 })}
+                      min={1}
+                      max={4000}
+                    />
+                  </Field>
+                  <Field>
+                    <Label>Height</Label>
+                    <Input
+                      type="number"
+                      value={config.height.toString()}
+                      onChange={(e) => updateConfig({ height: parseInt(e.target.value) || 0 })}
+                      min={1}
+                      max={4000}
+                    />
+                  </Field>
                 </div>
-              </Field>
 
-              {/* Text */}
-              <Field>
-                <Label>Text</Label>
-                <Description>Use \n for line breaks</Description>
-                <Textarea
-                  value={config.text}
-                  onChange={(e) => updateConfig({ text: e.target.value })}
-                  rows={3}
-                  placeholder="Leave empty for dimensions"
-                />
-              </Field>
-
-              {/* Font Family */}
-              <Field>
-                <Label>Font</Label>
-                <Select
-                  value={config.font}
-                  onChange={(e) => updateConfig({ font: e.target.value })}
-                >
-                  <option value="">Default (Sans-Serif)</option>
-                  <optgroup label="Sans-Serif">
-                    <option value="inter">Inter</option>
-                    <option value="roboto">Roboto</option>
-                    <option value="open-sans">Open Sans</option>
-                    <option value="lato">Lato</option>
-                    <option value="montserrat">Montserrat</option>
-                    <option value="poppins">Poppins</option>
-                    <option value="raleway">Raleway</option>
-                    <option value="nunito">Nunito</option>
-                  </optgroup>
-                  <optgroup label="Serif">
-                    <option value="playfair-display">Playfair Display</option>
-                    <option value="merriweather">Merriweather</option>
-                    <option value="lora">Lora</option>
-                    <option value="roboto-slab">Roboto Slab</option>
-                  </optgroup>
-                  <optgroup label="Monospace">
-                    <option value="roboto-mono">Roboto Mono</option>
-                    <option value="source-code-pro">Source Code Pro</option>
-                    <option value="fira-code">Fira Code</option>
-                    <option value="jetbrains-mono">JetBrains Mono</option>
-                  </optgroup>
-                  <optgroup label="Display">
-                    <option value="bebas-neue">Bebas Neue</option>
-                    <option value="lobster">Lobster</option>
-                    <option value="pacifico">Pacifico</option>
-                    <option value="dancing-script">Dancing Script</option>
-                  </optgroup>
-                </Select>
-              </Field>
-
-              {/* Font Settings */}
-              <div className="grid grid-cols-2 gap-4">
-                <Field>
-                  <Label>Font Size</Label>
-                  <Input
-                    type="number"
-                    value={config.fontSize}
-                    onChange={(e) => updateConfig({ fontSize: e.target.value })}
-                    placeholder="Auto"
-                  />
-                </Field>
-                <Field>
-                  <Label>Weight</Label>
-                  <Select
-                    value={config.fontWeight}
-                    onChange={(e) => updateConfig({ fontWeight: e.target.value })}
-                  >
-                    <option value="normal">Normal</option>
-                    <option value="bold">Bold</option>
-                  </Select>
-                </Field>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <Field>
-                  <Label>Style</Label>
-                  <Select
-                    value={config.fontStyle}
-                    onChange={(e) => updateConfig({ fontStyle: e.target.value })}
-                  >
-                    <option value="normal">Normal</option>
-                    <option value="italic">Italic</option>
-                  </Select>
-                </Field>
-                <Field>
-                  <Label>Alignment</Label>
-                  <Select
-                    value={config.align}
-                    onChange={(e) => updateConfig({ align: e.target.value as any })}
-                  >
-                    <option value="top">Top</option>
-                    <option value="center">Center</option>
-                    <option value="bottom">Bottom</option>
-                    <option value="custom">Custom</option>
-                  </Select>
-                </Field>
-              </div>
-
-              {config.align === 'custom' && (
-                <Field>
-                  <Label>Custom Y Position</Label>
-                  <Input
-                    type="number"
-                    value={config.customY}
-                    onChange={(e) => updateConfig({ customY: e.target.value })}
-                    placeholder="Y coordinate"
-                  />
-                </Field>
-              )}
-
-              {/* Advanced Options */}
-              <div>
-                <Button
-                  outline
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="w-full justify-between"
-                >
-                  <span>Advanced Options</span>
-                  {showAdvanced ? <ChevronDownIcon /> : <ChevronRightIcon />}
-                </Button>
-              </div>
-
-              {showAdvanced && (
-                <>
+                <div className="grid grid-cols-2 gap-3 mt-3">
                   <Field>
-                    <Label>Border Radius: {config.radius}px</Label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={config.radius}
-                      onChange={(e) => updateConfig({ radius: parseInt(e.target.value) })}
-                      className="w-full mt-3 cursor-pointer"
-                    />
-                  </Field>
-
-                  <Field>
-                    <Label>Shadow Size: {config.shadow}px</Label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="50"
-                      value={config.shadow}
-                      onChange={(e) => updateConfig({ shadow: parseInt(e.target.value) })}
-                      className="w-full mt-3 cursor-pointer"
-                    />
-                  </Field>
-
-                  {config.shadow > 0 && (
-                    <Field>
-                      <Label>Shadow Color</Label>
-                      <div className="flex gap-2 mt-3">
-                        <input
-                          type="color"
-                          value={`#${config.shadowColor}`}
-                          onChange={(e) => updateConfig({ shadowColor: e.target.value.slice(1) })}
-                          className="w-12 h-10 rounded-lg cursor-pointer border border-zinc-300 dark:border-zinc-600"
-                        />
-                        <Input
-                          type="text"
-                          value={config.shadowColor}
-                          onChange={(e) => updateConfig({ shadowColor: e.target.value.replace('#', '') })}
-                          className="flex-1 font-mono text-sm"
-                          placeholder="000000"
-                        />
-                      </div>
-                    </Field>
-                  )}
-
-                  <Field>
-                    <Label>Border Width: {config.border}px</Label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="20"
-                      value={config.border}
-                      onChange={(e) => updateConfig({ border: parseInt(e.target.value) })}
-                      className="w-full mt-3 cursor-pointer"
-                    />
-                  </Field>
-
-                  {config.border > 0 && (
-                    <Field>
-                      <Label>Border Color</Label>
-                      <div className="flex gap-2 mt-3">
-                        <input
-                          type="color"
-                          value={`#${config.borderColor || config.fgColor}`}
-                          onChange={(e) => updateConfig({ borderColor: e.target.value.slice(1) })}
-                          className="w-12 h-10 rounded-lg cursor-pointer border border-zinc-300 dark:border-zinc-600"
-                        />
-                        <Input
-                          type="text"
-                          value={config.borderColor}
-                          onChange={(e) => updateConfig({ borderColor: e.target.value.replace('#', '') })}
-                          className="flex-1 font-mono text-sm"
-                          placeholder={config.fgColor}
-                        />
-                      </div>
-                    </Field>
-                  )}
-
-                  <Field>
-                    <Label>Noise/Grain: {config.noise}</Label>
-                    <Description>Add vintage texture effect</Description>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={config.noise}
-                      onChange={(e) => updateConfig({ noise: parseInt(e.target.value) })}
-                      className="w-full mt-3 cursor-pointer"
-                    />
-                  </Field>
-
-                  <Field>
-                    <Label>Pattern Overlay</Label>
+                    <Label>Scale</Label>
                     <Select
-                      value={config.pattern}
-                      onChange={(e) => updateConfig({ pattern: e.target.value as any })}
+                      value={config.scale.toString()}
+                      onChange={(e) => updateConfig({ scale: parseInt(e.target.value) })}
                     >
-                      <option value="">None</option>
-                      <option value="dots">Dots</option>
-                      <option value="stripes">Stripes</option>
-                      <option value="checkerboard">Checkerboard</option>
-                      <option value="grid">Grid</option>
+                      <option value="1">@1x</option>
+                      <option value="2">@2x</option>
+                      <option value="3">@3x</option>
                     </Select>
                   </Field>
+                  <Field>
+                    <Label>Format</Label>
+                    <Select
+                      value={config.format}
+                      onChange={(e) => updateConfig({ format: e.target.value as 'png' | 'jpeg' | 'webp' })}
+                    >
+                      <option value="png">PNG</option>
+                      <option value="jpeg">JPEG</option>
+                      <option value="webp">WebP</option>
+                    </Select>
+                  </Field>
+                </div>
+              </FieldGroup>
+            </AccordionItem>
 
-                  {config.pattern && (
-                    <Field>
-                      <Label>Pattern Color</Label>
-                      <div className="flex gap-2 mt-3">
-                        <input
-                          type="color"
-                          value={`#${config.patternColor || config.fgColor}`}
-                          onChange={(e) => updateConfig({ patternColor: e.target.value.slice(1) })}
-                          className="w-12 h-10 rounded-lg cursor-pointer border border-zinc-300 dark:border-zinc-600"
-                        />
-                        <Input
-                          type="text"
-                          value={config.patternColor}
-                          onChange={(e) => updateConfig({ patternColor: e.target.value.replace('#', '') })}
-                          className="flex-1 font-mono text-sm"
-                          placeholder={config.fgColor}
-                        />
-                      </div>
-                    </Field>
-                  )}
+            {/* Colors Section */}
+            <AccordionItem title="Colors" defaultOpen={false}>
+              <FieldGroup>
+                <Field>
+                  <Label>Presets</Label>
+                  <div className="grid grid-cols-4 gap-2 mt-2">
+                    {COLOR_PRESETS.map((preset) => (
+                      <button
+                        key={preset.name}
+                        onClick={() => applyColorPreset(preset)}
+                        className="group relative aspect-square rounded-lg overflow-hidden border-2 border-zinc-300 dark:border-zinc-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors cursor-pointer"
+                        style={{
+                          background: preset.bg2
+                            ? `linear-gradient(135deg, #${preset.bg} 0%, #${preset.bg2} 100%)`
+                            : `#${preset.bg}`,
+                        }}
+                      >
+                        <span className="absolute inset-0 flex items-center justify-center text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 text-white">
+                          {preset.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </Field>
 
-                  {config.format === 'jpeg' && (
-                    <Field>
-                      <Label>Quality: {config.quality}%</Label>
-                      <input
-                        type="range"
-                        min="1"
-                        max="100"
-                        value={config.quality}
-                        onChange={(e) => updateConfig({ quality: parseInt(e.target.value) })}
-                        className="w-full mt-3 cursor-pointer"
-                      />
-                    </Field>
-                  )}
-                </>
-              )}
-            </FieldGroup>
-          </Fieldset>
+                <ColorInput
+                  label="Background"
+                  value={config.bgColor}
+                  onChange={(value) => updateConfig({ bgColor: value })}
+                  onRandomize={() => updateConfig({ bgColor: generateRandomColor() })}
+                  className="mt-3"
+                />
+
+                <SwitchField className="mt-3">
+                  <Label>Gradient</Label>
+                  <Switch
+                    color="blue"
+                    checked={config.gradientEnabled}
+                    onChange={(checked) => updateConfig({ gradientEnabled: checked })}
+                  />
+                </SwitchField>
+
+                {config.gradientEnabled && (
+                  <ColorInput
+                    label="Gradient Color 2"
+                    value={config.bgColor2}
+                    onChange={(value) => updateConfig({ bgColor2: value })}
+                    onRandomize={() => updateConfig({ bgColor2: generateRandomColor() })}
+                    placeholder="ffffff"
+                    className="mt-3"
+                  />
+                )}
+
+                <ColorInput
+                  label="Text Color"
+                  value={config.fgColor}
+                  onChange={(value) => updateConfig({ fgColor: value })}
+                  onRandomize={() => updateConfig({ fgColor: generateRandomColor() })}
+                  placeholder="333333"
+                  className="mt-3"
+                />
+              </FieldGroup>
+            </AccordionItem>
+
+            {/* Text & Font Section */}
+            <AccordionItem title="Text & Font" defaultOpen={false}>
+              <FieldGroup>
+                <Field>
+                  <Label>Text</Label>
+                  <Description>Use \n for line breaks</Description>
+                  <Textarea
+                    value={config.text}
+                    onChange={(e) => updateConfig({ text: e.target.value })}
+                    rows={3}
+                    placeholder="Leave empty for dimensions"
+                  />
+                </Field>
+
+                <Field className="mt-3">
+                  <Label>Font Family</Label>
+                  <Select
+                    value={config.font}
+                    onChange={(e) => updateConfig({ font: e.target.value })}
+                  >
+                    <option value="">Default</option>
+                    <optgroup label="Sans-Serif">
+                      <option value="inter">Inter</option>
+                      <option value="roboto">Roboto</option>
+                      <option value="open-sans">Open Sans</option>
+                      <option value="lato">Lato</option>
+                      <option value="montserrat">Montserrat</option>
+                      <option value="poppins">Poppins</option>
+                      <option value="raleway">Raleway</option>
+                      <option value="nunito">Nunito</option>
+                    </optgroup>
+                    <optgroup label="Serif">
+                      <option value="playfair-display">Playfair Display</option>
+                      <option value="merriweather">Merriweather</option>
+                      <option value="lora">Lora</option>
+                      <option value="roboto-slab">Roboto Slab</option>
+                    </optgroup>
+                    <optgroup label="Monospace">
+                      <option value="roboto-mono">Roboto Mono</option>
+                      <option value="source-code-pro">Source Code Pro</option>
+                      <option value="fira-code">Fira Code</option>
+                      <option value="jetbrains-mono">JetBrains Mono</option>
+                    </optgroup>
+                    <optgroup label="Display">
+                      <option value="bebas-neue">Bebas Neue</option>
+                      <option value="lobster">Lobster</option>
+                      <option value="pacifico">Pacifico</option>
+                      <option value="dancing-script">Dancing Script</option>
+                    </optgroup>
+                  </Select>
+                </Field>
+
+                <div className="grid grid-cols-2 gap-3 mt-3">
+                  <Field>
+                    <Label>Size</Label>
+                    <Input
+                      type="number"
+                      value={config.fontSize}
+                      onChange={(e) => updateConfig({ fontSize: e.target.value })}
+                      placeholder="Auto"
+                    />
+                  </Field>
+                  <Field>
+                    <Label>Weight</Label>
+                    <Select
+                      value={config.fontWeight}
+                      onChange={(e) => updateConfig({ fontWeight: e.target.value })}
+                    >
+                      <option value="normal">Normal</option>
+                      <option value="bold">Bold</option>
+                    </Select>
+                  </Field>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mt-3">
+                  <Field>
+                    <Label>Style</Label>
+                    <Select
+                      value={config.fontStyle}
+                      onChange={(e) => updateConfig({ fontStyle: e.target.value })}
+                    >
+                      <option value="normal">Normal</option>
+                      <option value="italic">Italic</option>
+                    </Select>
+                  </Field>
+                  <Field>
+                    <Label>Align</Label>
+                    <Select
+                      value={config.align}
+                      onChange={(e) => updateConfig({ align: e.target.value as 'top' | 'center' | 'bottom' | 'custom' })}
+                    >
+                      <option value="top">Top</option>
+                      <option value="center">Center</option>
+                      <option value="bottom">Bottom</option>
+                      <option value="custom">Custom</option>
+                    </Select>
+                  </Field>
+                </div>
+
+                {config.align === 'custom' && (
+                  <Field className="mt-3">
+                    <Label>Y Position</Label>
+                    <Input
+                      type="number"
+                      value={config.customY}
+                      onChange={(e) => updateConfig({ customY: e.target.value })}
+                      placeholder="Y coordinate"
+                    />
+                  </Field>
+                )}
+              </FieldGroup>
+            </AccordionItem>
+
+            {/* Effects Section */}
+            <AccordionItem title="Effects" defaultOpen={false}>
+              <FieldGroup>
+                <Field>
+                  <Label>Border Radius: {config.radius}px</Label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={config.radius}
+                    onChange={(e) => updateConfig({ radius: parseInt(e.target.value) })}
+                    className="w-full mt-2 cursor-pointer"
+                  />
+                </Field>
+
+                <Field className="mt-3">
+                  <Label>Border: {config.border}px</Label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="20"
+                    value={config.border}
+                    onChange={(e) => updateConfig({ border: parseInt(e.target.value) })}
+                    className="w-full mt-2 cursor-pointer"
+                  />
+                </Field>
+
+                {config.border > 0 && (
+                  <ColorInput
+                    label="Border Color"
+                    value={config.borderColor}
+                    onChange={(value) => updateConfig({ borderColor: value })}
+                    placeholder={config.fgColor}
+                    className="mt-3"
+                  />
+                )}
+
+                <Field className="mt-3">
+                  <Label>Shadow: {config.shadow}px</Label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="50"
+                    value={config.shadow}
+                    onChange={(e) => updateConfig({ shadow: parseInt(e.target.value) })}
+                    className="w-full mt-2 cursor-pointer"
+                  />
+                </Field>
+
+                {config.shadow > 0 && (
+                  <ColorInput
+                    label="Shadow Color"
+                    value={config.shadowColor}
+                    onChange={(value) => updateConfig({ shadowColor: value })}
+                    placeholder="000000"
+                    className="mt-3"
+                  />
+                )}
+
+                <Field className="mt-3">
+                  <Label>Noise: {config.noise}</Label>
+                  <Description>Vintage texture</Description>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={config.noise}
+                    onChange={(e) => updateConfig({ noise: parseInt(e.target.value) })}
+                    className="w-full mt-2 cursor-pointer"
+                  />
+                </Field>
+
+                <Field className="mt-3">
+                  <Label>Pattern</Label>
+                  <Select
+                    value={config.pattern}
+                    onChange={(e) => updateConfig({ pattern: e.target.value as '' | 'dots' | 'stripes' | 'checkerboard' | 'grid' })}
+                  >
+                    <option value="">None</option>
+                    <option value="dots">Dots</option>
+                    <option value="stripes">Stripes</option>
+                    <option value="checkerboard">Checkerboard</option>
+                    <option value="grid">Grid</option>
+                  </Select>
+                </Field>
+
+                {config.pattern && (
+                  <ColorInput
+                    label="Pattern Color"
+                    value={config.patternColor}
+                    onChange={(value) => updateConfig({ patternColor: value })}
+                    placeholder={config.fgColor}
+                    className="mt-3"
+                  />
+                )}
+
+                {config.format === 'jpeg' && (
+                  <Field className="mt-3">
+                    <Label>Quality: {config.quality}%</Label>
+                    <input
+                      type="range"
+                      min="1"
+                      max="100"
+                      value={config.quality}
+                      onChange={(e) => updateConfig({ quality: parseInt(e.target.value) })}
+                      className="w-full mt-2 cursor-pointer"
+                    />
+                  </Field>
+                )}
+              </FieldGroup>
+            </AccordionItem>
+          </Accordion>
         </div>
+      </aside>
 
-        {/* Right Column - Preview */}
-        <div className="lg:col-span-3">
-          <div className="lg:sticky lg:top-8 space-y-4">
-            <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-6 border border-zinc-200 dark:border-zinc-700">
-              <Heading level={3}>Preview</Heading>
-              <div className="bg-zinc-100 dark:bg-zinc-900 rounded-lg p-4 mt-4 mb-4 flex items-center justify-center min-h-[300px] max-h-[500px]">
+      {/* Main Content Area - Playground */}
+      <main className="flex flex-1 flex-col pb-2 pt-20 lg:pt-2 lg:min-w-0 lg:pr-2 lg:pl-80">
+        <div className="grow p-4 lg:p-10 lg:rounded-lg lg:bg-zinc-900 lg:shadow-xs lg:ring-1 lg:ring-white/10">
+          <div className="mx-auto max-w-6xl">
+            <div className="space-y-6">
+              {/* Preview */}
+              <div className="bg-black rounded-xl p-4 sm:p-8 flex items-center justify-center min-h-[300px] sm:min-h-[500px] border border-zinc-800 relative">
+                {imageLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl backdrop-blur-sm">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      <Text className="text-zinc-400 text-sm">Loading image...</Text>
+                    </div>
+                  </div>
+                )}
+                {imageError && !imageLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-3 text-center p-6">
+                      <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center">
+                        <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <Text className="text-red-400 font-medium">Failed to load image</Text>
+                      <Text className="text-zinc-500 text-sm">Check your settings and try again</Text>
+                    </div>
+                  </div>
+                )}
                 <img
                   src={imageUrl}
                   alt="Preview"
-                  className="max-w-full max-h-full rounded shadow-lg"
+                  className={`max-w-full max-h-[700px] rounded shadow-2xl transition-opacity duration-200 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                   style={{ imageRendering: 'crisp-edges' }}
+                  onLoad={() => {
+                    setImageLoading(false);
+                    setImageError(false);
+                  }}
+                  onError={() => {
+                    setImageLoading(false);
+                    setImageError(true);
+                  }}
                 />
               </div>
 
-              <Field>
-                <Label>Generated URL</Label>
-                <code className="block bg-zinc-900 dark:bg-zinc-950 text-green-400 p-3 rounded-lg text-xs overflow-x-auto font-mono mt-3">
+              {/* Generated URL */}
+              <div>
+                <code className="block bg-zinc-950 text-green-400 p-3 sm:p-4 rounded-lg text-xs sm:text-sm overflow-x-auto font-mono border border-zinc-800 break-all sm:break-normal">
                   https://imges.dev{imageUrl}
                 </code>
-              </Field>
+              </div>
 
-              <div className="grid grid-cols-2 gap-3 mt-4">
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <Button
                   color="cyan"
                   onClick={downloadImage}
+                  className="w-full sm:w-auto"
                 >
                   <ArrowDownTrayIcon />
                   Download
                 </Button>
                 <Button
                   color="indigo"
-                  onClick={() => {
-                    const fullUrl = `${window.location.origin}${imageUrl}`;
-                    navigator.clipboard.writeText(fullUrl);
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 2000);
-                  }}
+                  onClick={copyUrlToClipboard}
+                  className="w-full sm:w-auto"
                 >
                   <LinkIcon />
-                  Copy Full URL
+                  {copied ? '✓ Copied' : 'Copy URL'}
                 </Button>
+                <Text className="text-xs text-zinc-500 text-center sm:text-left mt-2 sm:mt-0 hidden sm:block">
+                  Shortcuts: <kbd className="px-1.5 py-0.5 bg-zinc-800 rounded text-zinc-300 font-mono">⌘K</kbd> Copy • <kbd className="px-1.5 py-0.5 bg-zinc-800 rounded text-zinc-300 font-mono">⌘D</kbd> Download • <kbd className="px-1.5 py-0.5 bg-zinc-800 rounded text-zinc-300 font-mono">⌘R</kbd> Randomize
+                </Text>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

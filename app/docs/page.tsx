@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { Heading, Subheading } from '../components/catalyst/heading';
 import { Text, Code } from '../components/catalyst/text';
 import { Badge } from '../components/catalyst/badge';
+import { StackedLayout } from '../components/catalyst/stacked-layout';
 
 export const metadata: Metadata = {
   title: "API Documentation",
@@ -17,20 +18,20 @@ interface ParamCardProps {
 
 function ParamCard({ name, description, example, imageUrl }: ParamCardProps) {
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+    <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
       <Subheading level={3} className="mb-2">
         {name}
       </Subheading>
       <Text className="mb-3">
         {description}
       </Text>
-      <div className="mb-3 rounded bg-zinc-50 p-3 dark:bg-zinc-800">
+      <div className="mb-3 rounded bg-zinc-50 p-3 dark:bg-zinc-900">
         <Code className="text-sm">{example}</Code>
       </div>
       <img
         src={imageUrl}
         alt={`Example: ${name}`}
-        className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+        className="w-full rounded border border-zinc-200 dark:border-zinc-800"
         loading="lazy"
       />
     </div>
@@ -39,22 +40,15 @@ function ParamCard({ name, description, example, imageUrl }: ParamCardProps) {
 
 export default function DocsPage() {
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-      <div className="mx-auto max-w-4xl px-6 py-16">
-        {/* Header */}
-        <div className="mb-12 text-center">
-          <div className="mb-4">
-            <a href="/" className="text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
-              ← Back to Home
-            </a>
-          </div>
-          <Heading className="mb-4">
-            API Documentation
-          </Heading>
-          <Text className="text-xl">
-            Generate custom placeholder images with a simple URL-based API
-          </Text>
-        </div>
+    <StackedLayout>
+      <Heading className="text-2xl/8 font-semibold sm:text-xl/8 mb-2">
+        API Documentation
+      </Heading>
+      <Text className="text-zinc-600 dark:text-zinc-400 mb-8">
+        Generate custom placeholder images with a simple URL-based API
+      </Text>
+
+      <hr className="mb-12 w-full border-t border-zinc-950/10 dark:border-white/10" />
 
         {/* Quick Start */}
         <section className="mb-16">
@@ -71,7 +65,7 @@ export default function DocsPage() {
             <img
               src="/800x600"
               alt="800x600 placeholder"
-              className="rounded-lg border-2 border-zinc-200 shadow-lg dark:border-zinc-700"
+              className="rounded-lg border-2 border-zinc-200 shadow-lg dark:border-zinc-800"
             />
           </div>
         </section>
@@ -85,7 +79,7 @@ export default function DocsPage() {
             <Code>https://imges.dev/[dimensions]/[bg-color]/[fg-color]?[params]</Code>
           </div>
           <div className="mt-6 space-y-4">
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
               <div className="mb-2 flex items-center gap-2">
                 <Subheading level={3}>[dimensions]</Subheading>
                 <Badge color="red">required</Badge>
@@ -97,7 +91,7 @@ export default function DocsPage() {
                 Examples: 800x600, 1920x1080, 300x200
               </Text>
             </div>
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
               <div className="mb-2 flex items-center gap-2">
                 <Subheading level={3}>[bg-color]</Subheading>
                 <Badge color="zinc">optional</Badge>
@@ -109,7 +103,7 @@ export default function DocsPage() {
                 Examples: 3b82f6, ff0000, random
               </Text>
             </div>
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
               <div className="mb-2 flex items-center gap-2">
                 <Subheading level={3}>[fg-color]</Subheading>
                 <Badge color="zinc">optional</Badge>
@@ -166,7 +160,7 @@ export default function DocsPage() {
               imageUrl="/800x600?text=Top&align=top"
             />
 
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
               <Subheading level={3} className="mb-2">
                 font
               </Subheading>
@@ -179,7 +173,7 @@ export default function DocsPage() {
               <img
                 src="/800x600?text=Fancy%20Font&font=playfair-display&size=60"
                 alt="Font example"
-                className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+                className="w-full rounded border border-zinc-200 dark:border-zinc-800"
                 loading="lazy"
               />
               <details className="mt-4">
@@ -223,7 +217,7 @@ export default function DocsPage() {
               imageUrl="/800x600/3b82f6/ffffff?text=Noisy&noise=50&size=60"
             />
 
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
               <Subheading level={3} className="mb-2">
                 pattern
               </Subheading>
@@ -237,31 +231,31 @@ export default function DocsPage() {
                 <img
                   src="/300x200/f8fafc/000000?pattern=dots&patternColor=3b82f6&text="
                   alt="Dots pattern"
-                  className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+                  className="w-full rounded border border-zinc-200 dark:border-zinc-800"
                   loading="lazy"
                 />
                 <img
                   src="/300x200/f8fafc/000000?pattern=stripes&patternColor=8b5cf6&text="
                   alt="Stripes pattern"
-                  className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+                  className="w-full rounded border border-zinc-200 dark:border-zinc-800"
                   loading="lazy"
                 />
                 <img
                   src="/300x200/f8fafc/000000?pattern=checkerboard&patternColor=10b981&text="
                   alt="Checkerboard pattern"
-                  className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+                  className="w-full rounded border border-zinc-200 dark:border-zinc-800"
                   loading="lazy"
                 />
                 <img
                   src="/300x200/f8fafc/000000?pattern=grid&patternColor=f59e0b&text="
                   alt="Grid pattern"
-                  className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+                  className="w-full rounded border border-zinc-200 dark:border-zinc-800"
                   loading="lazy"
                 />
               </div>
             </div>
 
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
               <Subheading level={3} className="mb-2">
                 format
               </Subheading>
@@ -282,7 +276,7 @@ export default function DocsPage() {
           </Subheading>
 
           <div className="space-y-8">
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
               <Subheading level={3} className="mb-2">
                 Gradients
               </Subheading>
@@ -295,11 +289,11 @@ export default function DocsPage() {
               <img
                 src="/800x600/3b82f6-8b5cf6/ffffff?text=Gradient"
                 alt="Gradient example"
-                className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+                className="w-full rounded border border-zinc-200 dark:border-zinc-800"
               />
             </div>
 
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
               <Subheading level={3} className="mb-2">
                 Retina (@2x, @3x)
               </Subheading>
@@ -314,7 +308,7 @@ export default function DocsPage() {
               </Text>
             </div>
 
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
               <Subheading level={3} className="mb-2">
                 Random Colors
               </Subheading>
@@ -329,7 +323,7 @@ export default function DocsPage() {
               </Text>
             </div>
 
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
               <Subheading level={3} className="mb-2">
                 Emoji Support
               </Subheading>
@@ -342,11 +336,11 @@ export default function DocsPage() {
               <img
                 src="/800x600?text=Hello%20👋%20World%20🌍"
                 alt="Emoji example"
-                className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+                className="w-full rounded border border-zinc-200 dark:border-zinc-800"
               />
             </div>
 
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
               <Subheading level={3} className="mb-2">
                 Font Showcase
               </Subheading>
@@ -357,31 +351,31 @@ export default function DocsPage() {
                 <div>
                   <Text className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">Sans-Serif</Text>
                   <div className="space-y-2">
-                    <img src="/500x80/f8fafc/1e293b?text=Inter&font=inter&size=32" alt="Inter" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
-                    <img src="/500x80/f8fafc/1e293b?text=Poppins&font=poppins&size=32" alt="Poppins" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
-                    <img src="/500x80/f8fafc/1e293b?text=Montserrat&font=montserrat&size=32" alt="Montserrat" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
+                    <img src="/500x80/f8fafc/1e293b?text=Inter&font=inter&size=32" alt="Inter" className="w-full rounded border border-zinc-200 dark:border-zinc-800" loading="lazy" />
+                    <img src="/500x80/f8fafc/1e293b?text=Poppins&font=poppins&size=32" alt="Poppins" className="w-full rounded border border-zinc-200 dark:border-zinc-800" loading="lazy" />
+                    <img src="/500x80/f8fafc/1e293b?text=Montserrat&font=montserrat&size=32" alt="Montserrat" className="w-full rounded border border-zinc-200 dark:border-zinc-800" loading="lazy" />
                   </div>
                 </div>
                 <div>
                   <Text className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">Serif</Text>
                   <div className="space-y-2">
-                    <img src="/500x80/f8fafc/1e293b?text=Playfair%20Display&font=playfair-display&size=32" alt="Playfair Display" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
-                    <img src="/500x80/f8fafc/1e293b?text=Merriweather&font=merriweather&size=32" alt="Merriweather" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
-                    <img src="/500x80/f8fafc/1e293b?text=Lora&font=lora&size=32" alt="Lora" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
+                    <img src="/500x80/f8fafc/1e293b?text=Playfair%20Display&font=playfair-display&size=32" alt="Playfair Display" className="w-full rounded border border-zinc-200 dark:border-zinc-800" loading="lazy" />
+                    <img src="/500x80/f8fafc/1e293b?text=Merriweather&font=merriweather&size=32" alt="Merriweather" className="w-full rounded border border-zinc-200 dark:border-zinc-800" loading="lazy" />
+                    <img src="/500x80/f8fafc/1e293b?text=Lora&font=lora&size=32" alt="Lora" className="w-full rounded border border-zinc-200 dark:border-zinc-800" loading="lazy" />
                   </div>
                 </div>
                 <div>
                   <Text className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">Monospace</Text>
                   <div className="space-y-2">
-                    <img src="/500x80/282a36/50fa7b?text=Fira%20Code&font=fira-code&size=28" alt="Fira Code" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
-                    <img src="/500x80/282a36/50fa7b?text=JetBrains%20Mono&font=jetbrains-mono&size=28" alt="JetBrains Mono" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
+                    <img src="/500x80/282a36/50fa7b?text=Fira%20Code&font=fira-code&size=28" alt="Fira Code" className="w-full rounded border border-zinc-200 dark:border-zinc-800" loading="lazy" />
+                    <img src="/500x80/282a36/50fa7b?text=JetBrains%20Mono&font=jetbrains-mono&size=28" alt="JetBrains Mono" className="w-full rounded border border-zinc-200 dark:border-zinc-800" loading="lazy" />
                   </div>
                 </div>
                 <div>
                   <Text className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">Display</Text>
                   <div className="space-y-2">
-                    <img src="/500x80/f8fafc/1e293b?text=BEBAS%20NEUE&font=bebas-neue&size=36" alt="Bebas Neue" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
-                    <img src="/500x80/fff5f5/d63031?text=Dancing%20Script&font=dancing-script&size=36" alt="Dancing Script" className="w-full rounded border border-zinc-200 dark:border-zinc-700" loading="lazy" />
+                    <img src="/500x80/f8fafc/1e293b?text=BEBAS%20NEUE&font=bebas-neue&size=36" alt="Bebas Neue" className="w-full rounded border border-zinc-200 dark:border-zinc-800" loading="lazy" />
+                    <img src="/500x80/fff5f5/d63031?text=Dancing%20Script&font=dancing-script&size=36" alt="Dancing Script" className="w-full rounded border border-zinc-200 dark:border-zinc-800" loading="lazy" />
                   </div>
                 </div>
               </div>
@@ -395,25 +389,25 @@ export default function DocsPage() {
             Example URLs
           </Subheading>
           <div className="space-y-4">
-            <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
               <Code className="mb-3 block text-sm">
                 /1920x1080/3b82f6-8b5cf6/ffffff?text=Hero%20Image&size=100&weight=bold
               </Code>
               <img
                 src="/1920x1080/3b82f6-8b5cf6/ffffff?text=Hero%20Image&size=100&weight=bold"
                 alt="Hero image example"
-                className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+                className="w-full rounded border border-zinc-200 dark:border-zinc-800"
               />
             </div>
             
-            <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
               <Code className="mb-3 block text-sm">
                 /400x300/random/ffffff?text=Card&border=5&borderColor=000000
               </Code>
               <img
                 src="/400x300/random/ffffff?text=Card&border=5&borderColor=000000"
                 alt="Card example"
-                className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+                className="w-full rounded border border-zinc-200 dark:border-zinc-800"
               />
             </div>
           </div>
@@ -424,7 +418,7 @@ export default function DocsPage() {
           <Subheading className="mb-6">
             Limits & Best Practices
           </Subheading>
-          <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+          <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
             <ul className="space-y-2 text-zinc-600 dark:text-zinc-400">
               <li>• Maximum dimensions: 4000x4000 pixels</li>
               <li>• Minimum dimensions: 1x1 pixels</li>
@@ -436,7 +430,7 @@ export default function DocsPage() {
         </section>
 
         {/* Footer */}
-        <div className="flex justify-center gap-8 border-t border-zinc-200 pt-8 text-center dark:border-zinc-700">
+        <div className="flex justify-center gap-8 border-t border-zinc-200 pt-8 text-center dark:border-zinc-800">
           <a
             href="/examples"
             className="text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
@@ -450,7 +444,6 @@ export default function DocsPage() {
             Back to Home
           </a>
         </div>
-      </div>
-    </div>
+    </StackedLayout>
   );
 }
