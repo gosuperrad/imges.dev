@@ -58,15 +58,32 @@ export default function DocsPage() {
           <Text className="mb-4">
             The simplest way to generate an image:
           </Text>
-          <div className="overflow-hidden rounded-lg bg-zinc-900 p-4 dark:bg-zinc-800">
+          <div className="overflow-hidden rounded-lg bg-zinc-900 p-4 dark:bg-zinc-800 mb-2">
             <Code>https://imges.dev/800x600</Code>
           </div>
-          <div className="mt-4 flex justify-center">
-            <img
-              src="/800x600"
-              alt="800x600 placeholder"
-              className="rounded-lg border-2 border-zinc-200 shadow-lg dark:border-zinc-800"
-            />
+          <Text className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
+            Or use shorthand for square images:
+          </Text>
+          <div className="overflow-hidden rounded-lg bg-zinc-900 p-4 dark:bg-zinc-800">
+            <Code>https://imges.dev/300</Code>
+          </div>
+          <div className="mt-4 flex justify-center gap-4">
+            <div className="text-center">
+              <img
+                src="/800x600"
+                alt="800x600 placeholder"
+                className="rounded-lg border-2 border-zinc-200 shadow-lg dark:border-zinc-800 mb-2"
+              />
+              <Code className="text-xs">800x600</Code>
+            </div>
+            <div className="text-center">
+              <img
+                src="/300"
+                alt="300x300 square placeholder"
+                className="rounded-lg border-2 border-zinc-200 shadow-lg dark:border-zinc-800 mb-2"
+              />
+              <Code className="text-xs">300</Code>
+            </div>
           </div>
         </section>
 
@@ -75,9 +92,12 @@ export default function DocsPage() {
           <Subheading className="mb-4">
             URL Structure
           </Subheading>
-          <div className="overflow-hidden rounded-lg bg-zinc-900 p-4 dark:bg-zinc-800">
+          <div className="overflow-hidden rounded-lg bg-zinc-900 p-4 dark:bg-zinc-800 mb-2">
             <Code>https://imges.dev/[dimensions]/[bg-color]/[fg-color]?[params]</Code>
           </div>
+          <Text className="text-sm text-zinc-500 dark:text-zinc-400">
+            For square images, use shorthand: <Code>[size]</Code> instead of <Code>[dimensions]</Code>
+          </Text>
           <div className="mt-6 space-y-4">
             <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
               <div className="mb-2 flex items-center gap-2">
@@ -85,10 +105,10 @@ export default function DocsPage() {
                 <Badge color="red">required</Badge>
               </div>
               <Text>
-                Format: <Code>WIDTHxHEIGHT</Code>
+                Format: <Code>WIDTHxHEIGHT</Code> or <Code>SIZE</Code> (for square)
               </Text>
               <Text className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                Examples: 800x600, 1920x1080, 300x200
+                Examples: <Code>800x600</Code>, <Code>1920x1080</Code>, <Code>300</Code> (creates 300x300)
               </Text>
             </div>
             <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
@@ -409,6 +429,110 @@ export default function DocsPage() {
                 alt="Card example"
                 className="w-full rounded border border-zinc-200 dark:border-zinc-800"
               />
+            </div>
+          </div>
+        </section>
+
+        {/* Error Handling */}
+        <section className="mb-16">
+          <Subheading className="mb-6">
+            Error Handling
+          </Subheading>
+          <Text className="mb-6">
+            The API returns detailed JSON error responses when requests are invalid, helping you quickly identify and fix issues.
+          </Text>
+          
+          <div className="space-y-6">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+              <Subheading level={3} className="mb-3">
+                Error Response Format
+              </Subheading>
+              <Text className="mb-3">
+                All error responses include these fields:
+              </Text>
+              <div className="rounded bg-zinc-50 p-4 dark:bg-zinc-900">
+                <pre className="overflow-x-auto text-sm">
+{`{
+  "error": "Error title",
+  "message": "Detailed error message",
+  "received": "The value you provided",
+  "expected": "What we expected",
+  "suggestion": "How to fix it",
+  "docs": "https://imges.dev/docs",
+  "examples": [
+    "https://imges.dev/800x600",
+    "https://imges.dev/300"
+  ]
+}`}
+                </pre>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+              <Subheading level={3} className="mb-3">
+                Common Error Examples
+              </Subheading>
+              
+              <div className="space-y-4">
+                <div>
+                  <Text className="mb-2 font-semibold">Invalid Dimension Format</Text>
+                  <div className="rounded bg-zinc-50 p-3 dark:bg-zinc-900">
+                    <Code className="text-sm text-red-600 dark:text-red-400">GET /invalid</Code>
+                  </div>
+                  <Text className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                    Returns: "Invalid dimension format. Expected: WIDTHxHEIGHT or SIZE (e.g., 800x600 or 300)"
+                  </Text>
+                </div>
+
+                <div>
+                  <Text className="mb-2 font-semibold">Dimensions Out of Range</Text>
+                  <div className="rounded bg-zinc-50 p-3 dark:bg-zinc-900">
+                    <Code className="text-sm text-red-600 dark:text-red-400">GET /5000x5000</Code>
+                  </div>
+                  <Text className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                    Returns: "Dimensions exceed maximum allowed size. Max: 4000x4000"
+                  </Text>
+                </div>
+
+                <div>
+                  <Text className="mb-2 font-semibold">Invalid Color Format</Text>
+                  <div className="rounded bg-zinc-50 p-3 dark:bg-zinc-900">
+                    <Code className="text-sm text-red-600 dark:text-red-400">GET /800x600/invalidcolor</Code>
+                  </div>
+                  <Text className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                    Returns: "Invalid hex color format. Expected: 3 or 6 hexadecimal digits (e.g., 'fff' or '3b82f6')"
+                  </Text>
+                </div>
+
+                <div>
+                  <Text className="mb-2 font-semibold">Unsupported Format</Text>
+                  <div className="rounded bg-zinc-50 p-3 dark:bg-zinc-900">
+                    <Code className="text-sm text-red-600 dark:text-red-400">GET /800x600.gif</Code>
+                  </div>
+                  <Text className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                    Returns: &quot;Unsupported image format. Supported: png, jpeg, webp&quot;
+                  </Text>
+                </div>
+
+                <div>
+                  <Text className="mb-2 font-semibold">Invalid Query Parameter</Text>
+                  <div className="rounded bg-zinc-50 p-3 dark:bg-zinc-900">
+                    <Code className="text-sm text-red-600 dark:text-red-400">GET /800x600?border=abc</Code>
+                  </div>
+                  <Text className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                    Returns: &quot;Invalid border value. Expected: Number between 0 and 100&quot;
+                  </Text>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-950">
+              <Text className="text-blue-900 dark:text-blue-100">
+                <strong>Tip:</strong> When integrating the API, check the HTTP status code. 
+                <Code className="mx-1">200</Code> indicates success and returns an image. 
+                <Code className="mx-1">400</Code> indicates a client error with a JSON error response.
+                <Code className="mx-1">500</Code> indicates a server error.
+              </Text>
             </div>
           </div>
         </section>

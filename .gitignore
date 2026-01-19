@@ -44,3 +44,5 @@ open-next.config.ts
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/lib/generated/prisma
