@@ -1,0 +1,14 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Test PR Workflow
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Echo test
+        run: echo "PR workflow is working!"

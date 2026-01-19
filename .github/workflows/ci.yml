@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Test Workflow
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Echo test
+        run: echo "Workflow is working!"
+      
+      - name: Check Node version
+        run: node --version
