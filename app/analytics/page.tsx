@@ -13,6 +13,9 @@ export const metadata = {
   description: "Usage analytics for imges.dev placeholder image generator",
 };
 
+// Force dynamic rendering (check auth on every request)
+export const dynamic = 'force-dynamic';
+
 export default async function AnalyticsPage() {
   // Check authentication
   const isAuth = await isAnalyticsAuthenticated();
