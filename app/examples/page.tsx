@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { CheckIcon, ClipboardIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, ClipboardIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Dialog, DialogPanel, DialogBackdrop } from '@headlessui/react';
 import { Heading, Subheading } from '../components/catalyst/heading';
 import { Text } from '../components/catalyst/text';
 import { Badge } from '../components/catalyst/badge';
 import { Button } from '../components/catalyst/button';
+import { StackedLayout } from '../components/catalyst/stacked-layout';
 
 interface Example {
   title: string;
@@ -214,6 +216,7 @@ const categories = ["All", ...Array.from(new Set(examples.map(e => e.category)))
 export default function ExamplesPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<Example | null>(null);
 
   const filteredExamples = selectedCategory === "All" 
     ? examples 
@@ -227,38 +230,33 @@ export default function ExamplesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-      <div className="mx-auto max-w-7xl px-6 py-16">
-        {/* Header */}
-        <div className="mb-12 text-center">
-          <div className="mb-4">
-            <a href="/" className="text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
-              ← Back to Home
-            </a>
-          </div>
-          <Heading className="mb-4">
-            Example Gallery
-          </Heading>
-          <Text className="text-xl">
-            Get inspired with these creative placeholder examples
-          </Text>
-        </div>
+    <StackedLayout>
+      <Heading className="text-2xl/8 font-semibold sm:text-xl/8 mb-2">
+        Example Gallery
+      </Heading>
+      <Text className="text-zinc-600 dark:text-zinc-400 mb-8">
+        Get inspired with these creative placeholder examples
+      </Text>
+
+      <hr className="mb-8 w-full border-t border-zinc-950/10 dark:border-white/10" />
 
         {/* Category Filter */}
-        <div className="mb-8 flex flex-wrap justify-center gap-3">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`rounded-full px-6 py-2 font-medium transition-all ${
-                selectedCategory === category
-                  ? "bg-blue-600 text-white shadow-lg dark:bg-blue-500"
-                  : "bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-              }`}
-            >
-              {category}
-            </button>
-          ))}
+        <div className="mb-8 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:justify-center sm:gap-3 scrollbar-hide">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-medium transition-all sm:px-6 ${
+                  selectedCategory === category
+                    ? "bg-blue-600 text-white shadow-lg dark:bg-blue-500"
+                    : "bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Examples Grid */}
@@ -266,16 +264,26 @@ export default function ExamplesPage() {
           {filteredExamples.map((example, index) => (
             <div
               key={index}
-              className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg transition-all hover:shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
+              className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg transition-all hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-950"
             >
               {/* Image Preview */}
-              <div className="relative aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+              <div 
+                className="relative aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-800 cursor-pointer group"
+                onClick={() => setLightboxImage(example)}
+              >
                 <img
                   src={example.url}
                   alt={example.title}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
                   loading="lazy"
                 />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 dark:bg-zinc-900/90 rounded-full p-3">
+                    <svg className="w-6 h-6 text-zinc-900 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                    </svg>
+                  </div>
+                </div>
                 <div className="absolute right-2 top-2">
                   <Badge color="zinc" className="bg-black/50 text-white">
                     {example.category}
@@ -323,7 +331,7 @@ export default function ExamplesPage() {
         </div>
 
         {/* Footer Links */}
-        <div className="mt-16 flex justify-center gap-8 border-t border-zinc-200 pt-8 text-center dark:border-zinc-700">
+        <div className="mt-16 flex justify-center gap-8 border-t border-zinc-200 pt-8 text-center dark:border-zinc-800">
           <a
             href="/docs"
             className="text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
@@ -337,7 +345,78 @@ export default function ExamplesPage() {
             Back to Home
           </a>
         </div>
-      </div>
-    </div>
+
+      {/* Lightbox Modal */}
+      <Dialog open={lightboxImage !== null} onClose={() => setLightboxImage(null)} className="relative z-50">
+        <DialogBackdrop className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" />
+        
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="relative max-w-5xl w-full">
+            {/* Close Button */}
+            <button
+              onClick={() => setLightboxImage(null)}
+              className="absolute -top-12 right-0 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              aria-label="Close"
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+
+            {lightboxImage && (
+              <div className="bg-white dark:bg-zinc-900 rounded-lg overflow-hidden shadow-2xl">
+                {/* Image */}
+                <div className="relative bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center p-4 max-h-[70vh]">
+                  <img
+                    src={lightboxImage.url}
+                    alt={lightboxImage.title}
+                    className="max-w-full max-h-[70vh] object-contain rounded"
+                  />
+                </div>
+
+                {/* Info */}
+                <div className="p-6 border-t border-zinc-200 dark:border-zinc-800">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <Subheading level={3} className="mb-1">
+                        {lightboxImage.title}
+                      </Subheading>
+                      <Text className="text-sm text-zinc-600 dark:text-zinc-400">
+                        {lightboxImage.description}
+                      </Text>
+                    </div>
+                    <Badge color="blue">{lightboxImage.category}</Badge>
+                  </div>
+
+                  {/* URL Display */}
+                  <div className="mb-3 overflow-hidden rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
+                    <code className="block overflow-x-auto text-xs text-zinc-700 dark:text-zinc-300">
+                      https://imges.dev{lightboxImage.url}
+                    </code>
+                  </div>
+
+                  {/* Copy Button */}
+                  <Button
+                    onClick={() => copyToClipboard(lightboxImage.url)}
+                    color="blue"
+                    className="w-full"
+                  >
+                    {copiedUrl === lightboxImage.url ? (
+                      <>
+                        <CheckIcon className="h-5 w-5" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <ClipboardIcon className="h-5 w-5" />
+                        Copy URL
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogPanel>
+        </div>
+      </Dialog>
+    </StackedLayout>
   );
 }

@@ -1,7 +1,6 @@
 # imges.dev
 
 [![CI](https://github.com/gosuperrad/imges.dev/actions/workflows/ci.yml/badge.svg)](https://github.com/gosuperrad/imges.dev/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/gosuperrad/imges.dev/actions/workflows/codeql.yml/badge.svg)](https://github.com/gosuperrad/imges.dev/actions/workflows/codeql.yml)
 
 A lightweight, fast placeholder image service built with Next.js and deployed on Railway.
 
