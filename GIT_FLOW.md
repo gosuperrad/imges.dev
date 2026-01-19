@@ -107,22 +107,51 @@ git branch -d hotfix/fix-image-crash
 git push origin --delete hotfix/fix-image-crash
 ```
 
+## Merge Strategy (IMPORTANT!)
+
+To keep `main` and `develop` in sync, use different merge strategies depending on the PR:
+
+### Feature → Develop
+- **Merge Method**: **Squash and merge** ✅
+- **Why**: Keeps develop history clean with one commit per feature
+- **Result**: Clean, linear history on develop
+
+### Develop → Main (Releases)
+- **Merge Method**: **Create a merge commit** ✅ (NOT squash!)
+- **Why**: Preserves full commit history and keeps branches in sync
+- **Result**: Main and develop stay synchronized automatically
+- **After merge**: No manual sync needed! 🎉
+
+### Critical: Sync After Squash Merges to Main
+
+If you accidentally use "Squash and merge" for develop → main:
+
+```bash
+# Immediately sync develop with main
+git checkout develop
+git pull origin develop
+git merge origin/main -m "chore: sync develop with main after release"
+git push origin develop
+```
+
+**Why this matters**: Squash merging creates different commit histories between branches, causing them to diverge. Using regular merge commits keeps them in sync.
+
 ## Workflow Summary
 
 ### For New Features
 1. Create feature branch from `develop`
 2. Develop and commit changes
 3. Create PR to merge into `develop`
-4. After review, merge to `develop`
+4. After review, **squash and merge** to `develop`
 5. Delete feature branch
 
 ### For Releases
-1. Create release branch from `develop`
-2. Bump version, final testing
-3. Merge to `main` with tag
-4. Merge back to `develop`
-5. Delete release branch
-6. Railway automatically deploys `main` to production
+1. When `develop` is ready, create PR from `develop` → `main`
+2. Review the changes
+3. **Create a merge commit** (NOT squash!) to `main`
+4. Add git tag for version (e.g., `v1.2.0`)
+5. Railway automatically deploys `main` to production
+6. ✅ Branches stay in sync automatically!
 
 ### For Hotfixes
 1. Create hotfix branch from `main`
@@ -131,22 +160,26 @@ git push origin --delete hotfix/fix-image-crash
 4. Merge to `develop`
 5. Delete hotfix branch
 
-## Branch Protection Rules
+## Branch Protection Rulesets
 
-While GitHub branch protection requires GitHub Pro, here are the **recommended practices**:
+This repository uses GitHub **Repository Rulesets** (available on free tier) to enforce Git Flow best practices.
 
-### Main Branch
-- ✅ No direct commits
-- ✅ All changes via Pull Request
-- ✅ Require PR reviews before merging
+### Main Branch Ruleset
+- ✅ No direct commits (require pull request)
+- ✅ Require 1 approval before merging
 - ✅ Require conversation resolution
+- ✅ Require status checks to pass (CI/CD)
 - ✅ No force pushes
 - ✅ No branch deletion
+- ✅ Block creation (only through PRs)
 
-### Develop Branch
-- ✅ No direct commits (use feature branches)
-- ✅ All changes via Pull Request
-- ✅ Allow force pushes (for rebasing feature branches)
+### Develop Branch Ruleset
+- ✅ No direct commits (require pull request)
+- ✅ Require status checks to pass (CI/CD)
+- ✅ Allow force pushes (for rebasing if needed)
+- ✅ Require conversation resolution
+
+Rulesets are configured in **Settings → Rules → Rulesets** on GitHub.
 
 ## Railway Deployment Strategy
 
