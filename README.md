@@ -66,7 +66,7 @@ Visit [imges.dev/examples](https://imges.dev/examples) for a full gallery of exa
 
 ## Analytics
 
-imges.dev tracks anonymous usage analytics in production to understand popular sizes, colors, and features. View real-time analytics at [imges.dev/analytics](https://imges.dev/analytics).
+imges.dev tracks anonymous usage analytics in production to understand popular sizes, colors, and features.
 
 **Tracked data:**
 - Image dimensions
@@ -74,7 +74,7 @@ imges.dev tracks anonymous usage analytics in production to understand popular s
 - Image formats (PNG, JPEG, WebP)
 - Features used (text, borders, blur, patterns, gradients, custom fonts)
 
-Analytics are powered by Prisma + PostgreSQL running on Railway. No personally identifiable information is collected.
+Analytics are powered by Prisma + PostgreSQL running on Railway. No personally identifiable information is collected. The analytics dashboard is password-protected for internal use only.
 
 ## Development
 
@@ -204,3 +204,11 @@ This project follows [Git Flow](./GIT_FLOW.md) branching model:
 - `ci/*` - CI/CD related branches
 
 See [CHANGELOG.md](./CHANGELOG.md) for project history.
+
+## License
+
+This project is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/).
+
+**TL;DR:** You can use, modify, and share this code for non-commercial purposes with attribution. Commercial use is not permitted.
+
+See [LICENSE](./LICENSE) for full details.
