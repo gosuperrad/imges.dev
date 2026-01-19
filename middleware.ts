@@ -4,8 +4,15 @@ import type { NextRequest } from "next/server";
 /**
  * Rate Limiter
  * 
- * Simple in-memory rate limiter for image generation endpoints.
- * For production with multiple instances, consider using Redis or Upstash.
+ * Simple in-memory rate limiter for image generation and login endpoints.
+ * 
+ * IMPORTANT LIMITATION: This implementation uses in-memory storage (Map),
+ * which means each server instance maintains its own separate rate limit counters.
+ * In serverless or multi-instance deployments, users could bypass limits by hitting
+ * different instances. For production with multiple instances, migrate to a distributed
+ * solution like Redis, Upstash, or Vercel KV.
+ * 
+ * Current deployment: Railway (single instance) - this implementation is sufficient.
  */
 
 interface RateLimitRecord {
@@ -17,28 +24,34 @@ const rateLimiter = new Map<string, RateLimitRecord>();
 
 // Configuration
 const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 100; // requests per window
+const RATE_LIMIT_MAX_REQUESTS = 100; // requests per window for images
+const LOGIN_RATE_LIMIT_MAX_REQUESTS = 5; // requests per window for login (stricter)
 const CLEANUP_PROBABILITY = 0.01; // 1% chance to cleanup on each request
 
 /**
  * Get client identifier from request
- * Uses X-Forwarded-For header (Railway provides this)
+ * Uses multiple headers with fallback for better reliability and to prevent spoofing
  */
 function getClientId(request: NextRequest): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  const ip = forwarded?.split(",")[0]?.trim() || "unknown";
+  // Try multiple headers in order of trustworthiness
+  const realIp = request.headers.get("x-real-ip");
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  
+  // Use X-Real-IP if available (more trustworthy), otherwise first IP in X-Forwarded-For
+  const ip = realIp?.trim() || forwardedFor?.split(",")[0]?.trim() || "unknown";
+  
   return ip;
 }
 
 /**
  * Check if request should be rate limited
  */
-function checkRateLimit(clientId: string): { allowed: boolean; retryAfter?: number } {
+function checkRateLimit(clientId: string, maxRequests: number = RATE_LIMIT_MAX_REQUESTS): { allowed: boolean; retryAfter?: number } {
   const now = Date.now();
   const record = rateLimiter.get(clientId);
 
   if (record && now < record.resetTime) {
-    if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
+    if (record.count >= maxRequests) {
       const retryAfter = Math.ceil((record.resetTime - now) / 1000);
       return { allowed: false, retryAfter };
     }
@@ -85,10 +98,31 @@ function isImageRequest(pathname: string): boolean {
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const clientId = getClientId(request);
 
-  // Only rate limit image generation requests
+  // Rate limit login endpoint more strictly (prevent brute force)
+  if (pathname === "/analytics/login/api") {
+    const { allowed, retryAfter } = checkRateLimit(`login:${clientId}`, LOGIN_RATE_LIMIT_MAX_REQUESTS);
+
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          error: "Too Many Login Attempts",
+          message: "Please wait before trying again.",
+          retryAfter: retryAfter,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retryAfter),
+          },
+        }
+      );
+    }
+  }
+
+  // Rate limit image generation requests
   if (isImageRequest(pathname)) {
-    const clientId = getClientId(request);
     const { allowed, retryAfter } = checkRateLimit(clientId);
 
     if (!allowed) {

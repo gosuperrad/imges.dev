@@ -29,7 +29,10 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Next.js requires unsafe-inline/eval for dev
+              // Note: 'unsafe-inline' and 'unsafe-eval' weaken CSP protection but are required
+              // for Next.js to function (dev mode & production hydration). For stronger security,
+              // consider implementing nonce-based CSP in the future.
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' data: https: blob:", // Allow images from any HTTPS source (for Twemoji CDN)

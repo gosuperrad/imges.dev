@@ -6,10 +6,25 @@
  */
 
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 
 const ANALYTICS_COOKIE_NAME = "analytics_auth";
 const ANALYTICS_TOKEN_ENV = "ANALYTICS_TOKEN";
+
+/**
+ * Timing-safe string comparison to prevent timing attacks
+ */
+function timingSafeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  
+  const bufA = Buffer.from(a, "utf8");
+  const bufB = Buffer.from(b, "utf8");
+  
+  return timingSafeEqual(bufA, bufB);
+}
 
 /**
  * Check if analytics access is authenticated
@@ -26,19 +41,27 @@ export async function isAnalyticsAuthenticated(): Promise<boolean> {
   const cookieStore = await cookies();
   const userToken = cookieStore.get(ANALYTICS_COOKIE_NAME)?.value;
 
-  return userToken === token;
+  if (!userToken) {
+    return false;
+  }
+
+  return timingSafeCompare(userToken, token);
 }
 
 /**
  * Verify analytics authentication in API route or server component
  * Throws an error or returns a redirect response if not authenticated
  */
-export async function requireAnalyticsAuth(): Promise<{ authenticated: true } | NextResponse> {
+export async function requireAnalyticsAuth(requestUrl?: string): Promise<{ authenticated: true } | NextResponse> {
   const isAuth = await isAnalyticsAuthenticated();
   
   if (!isAuth) {
-    // Return redirect response
-    return NextResponse.redirect(new URL("/analytics/login", process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"));
+    // Use the request URL if provided, otherwise default to production URL
+    const baseUrl = requestUrl 
+      ? new URL(requestUrl).origin 
+      : (process.env.NEXT_PUBLIC_BASE_URL || "https://imges.dev");
+    
+    return NextResponse.redirect(new URL("/analytics/login", baseUrl));
   }
 
   return { authenticated: true };
@@ -55,7 +78,7 @@ export async function handleAnalyticsLogin(token: string): Promise<{ success: bo
     return { success: false, error: "Analytics authentication not configured" };
   }
 
-  if (token !== correctToken) {
+  if (!timingSafeCompare(token, correctToken)) {
     return { success: false, error: "Invalid access token" };
   }
 

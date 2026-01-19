@@ -165,7 +165,7 @@ Configured via `next.config.ts`:
 ### Best Practices
 - All dependencies regularly updated via Dependabot
 - TypeScript strict mode enabled
-- Automated security audits in CI/CD pipeline
+- Security audits via `npm audit` in CI/CD pipeline
 - Public repository (no sensitive data in commits)
 
 ## Development

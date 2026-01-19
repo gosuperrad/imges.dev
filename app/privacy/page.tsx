@@ -45,15 +45,24 @@ export default function PrivacyPage() {
           </ul>
 
           <h3 className="text-xl font-semibold text-gray-800 mb-3">
-            What We Do NOT Collect
+            What We Do NOT Store or Log
           </h3>
+          <p className="text-gray-700 mb-2">
+            We do not store or log the following information in our analytics or databases:
+          </p>
           <ul className="list-disc list-inside space-y-2 text-gray-700 mb-4">
-            <li>IP addresses</li>
+            <li>IP addresses for analytics, tracking, or long-term logging</li>
             <li>Personal information (names, emails, etc.)</li>
             <li>Tracking cookies</li>
             <li>Full referrer URLs (only domains)</li>
             <li>Precise browser versions or OS versions</li>
           </ul>
+          <p className="text-gray-600 text-sm mb-4">
+            <strong>Note:</strong> For abuse prevention, IP addresses may be processed transiently in memory for
+            automated rate limiting (maximum 100 requests per minute per IP). These IPs are not logged,
+            persisted to disk or database, or used for analytics or tracking purposes. They are automatically
+            purged from memory after the rate limit window expires.
+          </p>
         </section>
 
         <section className="mb-8">
