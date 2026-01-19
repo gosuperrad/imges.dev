@@ -59,16 +59,6 @@ type ParseResult =
  */
 
 function validateDimensions(width: number, height: number): ValidationError | null {
-  if (width === 0 || height === 0) {
-    return {
-      field: "dimensions",
-      message: "Dimensions must be greater than 0",
-      received: `${width}x${height}`,
-      expected: "Positive numbers (e.g., 800x600 or 300)",
-      suggestion: "Try: /800x600 or /300 for a square image"
-    };
-  }
-
   if (width < 1 || height < 1) {
     return {
       field: "dimensions",
@@ -224,29 +214,31 @@ function parseParams(params: string[]): ParseResult {
   
   if (unsupportedFormatMatch && !formatMatch) {
     // Found a format extension, but it's not supported
-    const ext = unsupportedFormatMatch[2];
-    return {
-      success: false,
-      error: {
-        field: "format",
-        message: "Unsupported image format",
-        received: ext,
-        expected: "png, jpeg, jpg, or webp",
-        suggestion: `Try: /${unsupportedFormatMatch[1]}.png or /${unsupportedFormatMatch[1]}.webp`
-      }
-    };
+    // First validate that the dimension part is valid before suggesting a fix
+    const dimPart = unsupportedFormatMatch[1];
+    const dimCheck = dimPart.match(/^(\d+)(?:x(\d+))?$/);
+    if (!dimCheck) {
+      // Invalid dimension format - let it fall through to dimension validation
+      dimensionStr = dimPart;
+    } else {
+      // Valid dimensions but unsupported format
+      const ext = unsupportedFormatMatch[2];
+      return {
+        success: false,
+        error: {
+          field: "format",
+          message: "Unsupported image format",
+          received: ext,
+          expected: "png, jpeg, jpg, or webp",
+          suggestion: `Try: /${dimPart}.png or /${dimPart}.webp`
+        }
+      };
+    }
   }
   
   if (formatMatch) {
     dimensionStr = formatMatch[1];
     const ext = formatMatch[2].toLowerCase();
-    
-    // Validate format
-    const formatError = validateFormat(ext);
-    if (formatError) {
-      return { success: false, error: formatError };
-    }
-    
     format = ext === "jpg" ? "jpeg" : (ext as "png" | "jpeg" | "webp");
   }
 
@@ -603,6 +595,30 @@ async function drawTextWithEmojis(
   }
 }
 
+/**
+ * Convert a validation field name to a user-friendly error title
+ */
+function formatErrorTitle(field: string): string {
+  const titles: Record<string, string> = {
+    "dimensions": "Invalid Dimensions",
+    "background-color": "Invalid Background Color",
+    "foreground-color": "Invalid Foreground Color",
+    "gradient-color-2": "Invalid Gradient Color",
+    "format": "Unsupported Format",
+    "border": "Invalid Border Width",
+    "blur": "Invalid Blur Amount",
+    "pattern": "Invalid Pattern",
+    "quality": "Invalid Quality",
+    "text": "Invalid Text",
+    "font": "Invalid Font",
+    "font-size": "Invalid Font Size",
+    "font-weight": "Invalid Font Weight",
+    "font-style": "Invalid Font Style"
+  };
+  
+  return titles[field] || "Invalid Request";
+}
+
 function createErrorResponse(error: ValidationError, status?: number): NextResponse;
 function createErrorResponse(message: string, status?: number): NextResponse;
 function createErrorResponse(
@@ -627,7 +643,7 @@ function createErrorResponse(
     // Detailed ValidationError object
     const error = errorOrMessage;
     responseBody = {
-      error: error.message,
+      error: formatErrorTitle(error.field),
       message: error.message,
       received: error.received,
       expected: error.expected,
@@ -789,8 +805,8 @@ export async function GET(
   
   const quality = searchParams.get("quality") ? parseInt(searchParams.get("quality")!) : 90;
   
-  // Validate quality
-  const qualityError = validateNumberParam(searchParams.get("quality") || "90", "quality", 1, 100);
+  // Validate quality (only if provided by user)
+  const qualityError = validateNumberParam(searchParams.get("quality"), "quality", 1, 100);
   if (qualityError) {
     return createErrorResponse(qualityError);
   }

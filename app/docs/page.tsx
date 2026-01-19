@@ -510,53 +510,17 @@ export default function DocsPage() {
                     <Code className="text-sm text-red-600 dark:text-red-400">GET /800x600.gif</Code>
                   </div>
                   <Text className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-                    Returns: "Unsupported image format. Supported: png, jpeg, webp"
-                </Text>
-                <div className="rounded bg-zinc-50 p-3 dark:bg-zinc-900">
-                  <Code className="text-sm text-red-600 dark:text-red-400">GET /invalid</Code>
+                    Returns: &quot;Unsupported image format. Supported: png, jpeg, webp&quot;
+                  </Text>
                 </div>
-                <Text className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  Returns: &quot;Invalid dimension format. Expected: WIDTHxHEIGHT or SIZE (e.g., 800x600 or 300)&quot;
-                </Text>
-              </div>
 
-              <div>
-                <Text className="mb-2 font-semibold">Dimensions Out of Range</Text>
-                <div className="rounded bg-zinc-50 p-3 dark:bg-zinc-900">
-                  <Code className="text-sm text-red-600 dark:text-red-400">GET /5000x5000</Code>
-                </div>
-                <Text className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  Returns: &quot;Dimensions exceed maximum allowed size. Max: 4000x4000&quot;
-                </Text>
-              </div>
-
-              <div>
-                <Text className="mb-2 font-semibold">Invalid Color Format</Text>
-                <div className="rounded bg-zinc-50 p-3 dark:bg-zinc-900">
-                  <Code className="text-sm text-red-600 dark:text-red-400">GET /800x600/invalidcolor</Code>
-                </div>
-                <Text className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  Returns: &quot;Invalid hex color format. Expected: 3 or 6 hexadecimal digits (e.g., &apos;fff&apos; or &apos;3b82f6&apos;)&quot;
-                </Text>
-              </div>
-
-              <div>
-                <Text className="mb-2 font-semibold">Unsupported Format</Text>
-                <div className="rounded bg-zinc-50 p-3 dark:bg-zinc-900">
-                  <Code className="text-sm text-red-600 dark:text-red-400">GET /800x600.gif</Code>
-                </div>
-                <Text className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  Returns: &quot;Unsupported image format. Supported: png, jpeg, webp&quot;
-                </Text>
-              </div>
-
-              <div>
-                <Text className="mb-2 font-semibold">Invalid Query Parameter</Text>
-                <div className="rounded bg-zinc-50 p-3 dark:bg-zinc-900">
-                  <Code className="text-sm text-red-600 dark:text-red-400">GET /800x600?border=abc</Code>
-                </div>
-                <Text className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  Returns: &quot;Invalid border value. Expected: Number between 0 and 100&quot;
+                <div>
+                  <Text className="mb-2 font-semibold">Invalid Query Parameter</Text>
+                  <div className="rounded bg-zinc-50 p-3 dark:bg-zinc-900">
+                    <Code className="text-sm text-red-600 dark:text-red-400">GET /800x600?border=abc</Code>
+                  </div>
+                  <Text className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                    Returns: &quot;Invalid border value. Expected: Number between 0 and 100&quot;
                   </Text>
                 </div>
               </div>
