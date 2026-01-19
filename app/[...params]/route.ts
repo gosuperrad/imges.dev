@@ -68,30 +68,39 @@ function parseParams(params: string[]): ImageParams | null {
   let scale = 1;
   let format: "png" | "jpeg" | "webp" = defaults.format;
 
-  // Check for @2x, @3x suffix
-  const retinaMatch = dimensionStr.match(/^(\d+x\d+)@(\d)x$/);
+  // Check for @2x, @3x suffix (supports both "640x360@2x" and "300@2x")
+  const retinaMatch = dimensionStr.match(/^(\d+(?:x\d+)?)@(\d)x$/);
   if (retinaMatch) {
     dimensionStr = retinaMatch[1];
     scale = parseInt(retinaMatch[2]);
     if (scale < 1 || scale > 3) scale = 1;
   }
 
-  // Check for format extension
-  const formatMatch = dimensionStr.match(/^(\d+x\d+)\.(png|jpe?g|webp)$/i);
+  // Check for format extension (supports both "640x360.png" and "300.png")
+  const formatMatch = dimensionStr.match(/^(\d+(?:x\d+)?)\.(png|jpe?g|webp)$/i);
   if (formatMatch) {
     dimensionStr = formatMatch[1];
     const ext = formatMatch[2].toLowerCase();
     format = ext === "jpg" ? "jpeg" : (ext as "png" | "jpeg" | "webp");
   }
 
-  // Parse dimensions (e.g., "640x360")
+  // Parse dimensions (e.g., "640x360" or "300" for square)
+  let width: number;
+  let height: number;
+  
   const dimensionMatch = dimensionStr.match(/^(\d+)x(\d+)$/);
-  if (!dimensionMatch) {
+  const squareMatch = dimensionStr.match(/^(\d+)$/);
+  
+  if (dimensionMatch) {
+    // Standard WIDTHxHEIGHT format
+    width = parseInt(dimensionMatch[1]);
+    height = parseInt(dimensionMatch[2]);
+  } else if (squareMatch) {
+    // Square shorthand: just WIDTH (e.g., "300" becomes 300x300)
+    width = height = parseInt(squareMatch[1]);
+  } else {
     return null;
   }
-
-  const width = parseInt(dimensionMatch[1]);
-  const height = parseInt(dimensionMatch[2]);
 
   // Validate dimensions
   if (width < 1 || width > 4000 || height < 1 || height > 4000) {

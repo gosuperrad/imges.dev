@@ -18,6 +18,12 @@ interface Example {
 
 const examples: Example[] = [
   {
+    title: "Square Shorthand",
+    description: "Quick square image using size only",
+    url: "/300/3b82f6/ffffff?text=300x300",
+    category: "Basics"
+  },
+  {
     title: "Hero Image",
     description: "Large gradient hero with bold text",
     url: "/1920x1080/3b82f6-8b5cf6/ffffff?text=Hero%20Section&size=120&weight=bold",
@@ -26,13 +32,13 @@ const examples: Example[] = [
   {
     title: "Product Card",
     description: "Square placeholder with border",
-    url: "/600x600/f3f4f6/1f2937?text=Product&border=10&borderColor=3b82f6",
+    url: "/600/f3f4f6/1f2937?text=Product&border=10&borderColor=3b82f6",
     category: "E-commerce"
   },
   {
     title: "Avatar Placeholder",
     description: "Small circular-style placeholder",
-    url: "/200x200/random/ffffff?text=👤",
+    url: "/200/random/ffffff?text=👤",
     category: "User Interface"
   },
   {
@@ -50,7 +56,7 @@ const examples: Example[] = [
   {
     title: "Social Media Post",
     description: "Square format for Instagram/Facebook",
-    url: "/1080x1080/8b5cf6-ec4899/ffffff?text=📱%20Social%20Post&size=70",
+    url: "/1080/8b5cf6-ec4899/ffffff?text=📱%20Social%20Post&size=70",
     category: "Social Media"
   },
   {
