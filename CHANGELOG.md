@@ -5,7 +5,70 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+---
+
+## 📝 Maintenance Instructions
+
+**For Contributors & AI Agents:**
+
+When making changes to this project, please update this CHANGELOG:
+
+1. **Add entries under `[Unreleased]`** for any changes you make
+2. **Categorize changes** using these sections:
+   - `### Added` - New features
+   - `### Changed` - Changes to existing functionality
+   - `### Deprecated` - Soon-to-be removed features
+   - `### Removed` - Removed features
+   - `### Fixed` - Bug fixes
+   - `### Security` - Security improvements
+3. **Use clear, concise descriptions** (see existing entries for examples)
+4. **Include PR numbers** in format: `(#123)`
+5. **Update before merging** to develop or main
+
+**When releasing a version:**
+1. Move all `[Unreleased]` entries to a new version section (e.g., `## [1.2.0] - 2026-01-19`)
+2. Clear out the `[Unreleased]` section
+3. Update version numbers in `package.json`
+
+---
+
 ## [Unreleased]
+
+### Added
+- Analytics tracking system with PostgreSQL database (#19)
+  - Analytics dashboard at `/analytics` showing usage statistics
+  - Track popular dimensions, colors, formats, and features
+  - Optional authentication via `ANALYTICS_TOKEN` environment variable
+  - Privacy-focused: no PII collected
+- Debug endpoint at `/analytics/debug` for verifying token configuration (#25)
+- Privacy policy page at `/privacy` (#20)
+- Rate limiting: 100 requests/minute for images, 5/minute for login (#20)
+- Security headers: CSP, X-Frame-Options, X-Content-Type-Options, etc. (#20)
+- Resource complexity limits to prevent abuse (#20)
+- Square image shorthand: `/300` generates 300×300 (#17)
+- Prisma migrations run automatically on container startup (#26)
+
+### Changed
+- Analytics page now uses dynamic rendering to enforce authentication (#27)
+- Improved error messages with field-specific validation and suggestions (#18)
+- Error responses now include `docs` URL for reference (#18)
+
+### Fixed
+- TypeScript type errors in analytics page map callbacks (#22)
+- Prisma client generation in Docker build process (#23)
+- Analytics authentication now properly enforced (#24, #27)
+- Same-site referrers excluded from analytics to prevent data pollution (#29)
+- Git Flow: Use merge commits instead of squash for develop → main
+
+### Security
+- Timing-safe token comparison for analytics authentication (#20)
+- Brute-force protection on login endpoint (#20)
+- Comprehensive security headers (#20)
+- Privacy policy compliance (#20)
+
+---
+
+## [1.0.0] - 2024-01-XX - Initial Release
 
 ### Added
 - GitHub Actions CI/CD workflows
