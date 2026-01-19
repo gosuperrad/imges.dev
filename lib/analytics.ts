@@ -30,6 +30,23 @@ export async function trackImageEvent(data: AnalyticsEventData): Promise<void> {
     return;
   }
 
+  // Don't track requests from our own site (examples page, image builder, etc.)
+  // This prevents example images from polluting the analytics
+  if (data.referrer) {
+    try {
+      const referrerUrl = new URL(data.referrer);
+      const isOwnSite = referrerUrl.hostname === "imges.dev" || 
+                        referrerUrl.hostname === "www.imges.dev" ||
+                        referrerUrl.hostname.endsWith(".railway.app"); // Staging environment
+      
+      if (isOwnSite) {
+        return; // Skip tracking for our own site
+      }
+    } catch {
+      // Invalid referrer URL, continue with tracking
+    }
+  }
+
   try {
     // Create the event in the database
     await prisma.imageEvent.create({
