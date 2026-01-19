@@ -5,6 +5,8 @@ import {
   getPopularFeatures,
   getTotalEvents
 } from "@/lib/analytics";
+import { isAnalyticsAuthenticated } from "@/lib/analytics-auth";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Analytics - imges.dev",
@@ -12,6 +14,12 @@ export const metadata = {
 };
 
 export default async function AnalyticsPage() {
+  // Check authentication
+  const isAuth = await isAnalyticsAuthenticated();
+  if (!isAuth) {
+    redirect("/analytics/login");
+  }
+
   const [
     totalEvents,
     popularDimensions,
