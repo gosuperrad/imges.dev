@@ -14,14 +14,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom fonts support with 20+ Google Fonts
 - Rounded corners parameter (radius)
 - Shadow effects parameter (shadow, shadowColor)
+- Noise/grain texture effect (noise)
+- Pattern overlays: dots, stripes, checkerboard, grid (pattern, patternColor)
 - Font showcase section in documentation
 - Full URL display in image builder
 - Comprehensive font examples
+- New pattern examples in examples gallery
+- Caching headers for optimal performance (Cache-Control: public, max-age=31536000, immutable)
 
 ### Changed
 - Improved contrast in footer CTA section
 - Streamlined homepage layout
 - Enhanced documentation with visual font previews
+- Updated API documentation with noise and pattern parameters
+- Added 8 new examples showcasing noise and pattern effects
 
 ### Fixed
 - Font loading to use TTF format compatible with node-canvas

@@ -32,6 +32,9 @@ interface ImageConfig {
   radius: number;
   shadow: number;
   shadowColor: string;
+  noise: number;
+  pattern: '' | 'dots' | 'stripes' | 'checkerboard' | 'grid';
+  patternColor: string;
   quality: number;
   gradientEnabled: boolean;
 }
@@ -77,6 +80,9 @@ export default function ImageBuilder() {
     radius: 0,
     shadow: 0,
     shadowColor: '000000',
+    noise: 0,
+    pattern: '',
+    patternColor: '',
     quality: 90,
     gradientEnabled: false,
   });
@@ -113,6 +119,11 @@ export default function ImageBuilder() {
     if (cfg.shadow > 0) {
       params.set('shadow', cfg.shadow.toString());
       if (cfg.shadowColor !== '000000') params.set('shadowColor', cfg.shadowColor);
+    }
+    if (cfg.noise > 0) params.set('noise', cfg.noise.toString());
+    if (cfg.pattern) {
+      params.set('pattern', cfg.pattern);
+      if (cfg.patternColor) params.set('patternColor', cfg.patternColor);
     }
     if (cfg.format === 'jpeg' && cfg.quality !== 90) {
       params.set('quality', cfg.quality.toString());
@@ -567,6 +578,54 @@ export default function ImageBuilder() {
                           type="text"
                           value={config.borderColor}
                           onChange={(e) => updateConfig({ borderColor: e.target.value.replace('#', '') })}
+                          className="flex-1 font-mono text-sm"
+                          placeholder={config.fgColor}
+                        />
+                      </div>
+                    </Field>
+                  )}
+
+                  <Field>
+                    <Label>Noise/Grain: {config.noise}</Label>
+                    <Description>Add vintage texture effect</Description>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={config.noise}
+                      onChange={(e) => updateConfig({ noise: parseInt(e.target.value) })}
+                      className="w-full mt-3 cursor-pointer"
+                    />
+                  </Field>
+
+                  <Field>
+                    <Label>Pattern Overlay</Label>
+                    <Select
+                      value={config.pattern}
+                      onChange={(e) => updateConfig({ pattern: e.target.value as any })}
+                    >
+                      <option value="">None</option>
+                      <option value="dots">Dots</option>
+                      <option value="stripes">Stripes</option>
+                      <option value="checkerboard">Checkerboard</option>
+                      <option value="grid">Grid</option>
+                    </Select>
+                  </Field>
+
+                  {config.pattern && (
+                    <Field>
+                      <Label>Pattern Color</Label>
+                      <div className="flex gap-2 mt-3">
+                        <input
+                          type="color"
+                          value={`#${config.patternColor || config.fgColor}`}
+                          onChange={(e) => updateConfig({ patternColor: e.target.value.slice(1) })}
+                          className="w-12 h-10 rounded-lg cursor-pointer border border-zinc-300 dark:border-zinc-600"
+                        />
+                        <Input
+                          type="text"
+                          value={config.patternColor}
+                          onChange={(e) => updateConfig({ patternColor: e.target.value.replace('#', '') })}
                           className="flex-1 font-mono text-sm"
                           placeholder={config.fgColor}
                         />
