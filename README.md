@@ -66,7 +66,7 @@ Visit [imges.dev/examples](https://imges.dev/examples) for a full gallery of exa
 
 ## Analytics
 
-imges.dev tracks anonymous usage analytics in production to understand popular sizes, colors, and features. View real-time analytics at [imges.dev/analytics](https://imges.dev/analytics).
+imges.dev tracks anonymous usage analytics in production to understand popular sizes, colors, and features.
 
 **Tracked data:**
 - Image dimensions
@@ -74,7 +74,7 @@ imges.dev tracks anonymous usage analytics in production to understand popular s
 - Image formats (PNG, JPEG, WebP)
 - Features used (text, borders, blur, patterns, gradients, custom fonts)
 
-Analytics are powered by Prisma + PostgreSQL running on Railway. No personally identifiable information is collected.
+Analytics are powered by Prisma + PostgreSQL running on Railway. No personally identifiable information is collected. The analytics dashboard is password-protected for internal use only.
 
 ## Development
 

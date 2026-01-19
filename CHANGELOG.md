@@ -50,6 +50,7 @@ When making changes to this project, please update this CHANGELOG:
 
 ### Changed
 - Analytics page now uses dynamic rendering to enforce authentication (#27)
+- Analytics dashboard is password-protected (not publicly advertised)
 - Improved error messages with field-specific validation and suggestions (#18)
 - Error responses now include `docs` URL for reference (#18)
 
