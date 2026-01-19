@@ -210,7 +210,7 @@ function parseParams(params: string[]): ParseResult {
   let scale = 1;
   let format: "png" | "jpeg" | "webp" = defaults.format;
 
-  // Check for @2x, @3x suffix (works with both WIDTHxHEIGHT and SIZE formats)
+  // Check for @2x, @3x suffix (supports both "640x360@2x" and "300@2x")
   const retinaMatch = dimensionStr.match(/^(\d+(?:x\d+)?)@(\d)x$/);
   if (retinaMatch) {
     dimensionStr = retinaMatch[1];
@@ -218,7 +218,7 @@ function parseParams(params: string[]): ParseResult {
     if (scale < 1 || scale > 3) scale = 1;
   }
 
-  // Check for format extension (works with both WIDTHxHEIGHT and SIZE formats)
+  // Check for format extension (supports both "640x360.png" and "300.png")
   const formatMatch = dimensionStr.match(/^(\d+(?:x\d+)?)\.(png|jpe?g|webp)$/i);
   const unsupportedFormatMatch = dimensionStr.match(/^(\d+(?:x\d+)?)\.(\w+)$/i);
   
@@ -250,7 +250,7 @@ function parseParams(params: string[]): ParseResult {
     format = ext === "jpg" ? "jpeg" : (ext as "png" | "jpeg" | "webp");
   }
 
-  // Parse dimensions - supports both "WIDTHxHEIGHT" (e.g., "800x600") and "SIZE" (e.g., "300" for square)
+  // Parse dimensions (e.g., "640x360" or "300" for square)
   let width: number;
   let height: number;
   

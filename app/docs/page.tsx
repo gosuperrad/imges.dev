@@ -58,15 +58,32 @@ export default function DocsPage() {
           <Text className="mb-4">
             The simplest way to generate an image:
           </Text>
-          <div className="overflow-hidden rounded-lg bg-zinc-900 p-4 dark:bg-zinc-800">
+          <div className="overflow-hidden rounded-lg bg-zinc-900 p-4 dark:bg-zinc-800 mb-2">
             <Code>https://imges.dev/800x600</Code>
           </div>
-          <div className="mt-4 flex justify-center">
-            <img
-              src="/800x600"
-              alt="800x600 placeholder"
-              className="rounded-lg border-2 border-zinc-200 shadow-lg dark:border-zinc-800"
-            />
+          <Text className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
+            Or use shorthand for square images:
+          </Text>
+          <div className="overflow-hidden rounded-lg bg-zinc-900 p-4 dark:bg-zinc-800">
+            <Code>https://imges.dev/300</Code>
+          </div>
+          <div className="mt-4 flex justify-center gap-4">
+            <div className="text-center">
+              <img
+                src="/800x600"
+                alt="800x600 placeholder"
+                className="rounded-lg border-2 border-zinc-200 shadow-lg dark:border-zinc-800 mb-2"
+              />
+              <Code className="text-xs">800x600</Code>
+            </div>
+            <div className="text-center">
+              <img
+                src="/300"
+                alt="300x300 square placeholder"
+                className="rounded-lg border-2 border-zinc-200 shadow-lg dark:border-zinc-800 mb-2"
+              />
+              <Code className="text-xs">300</Code>
+            </div>
           </div>
         </section>
 
@@ -75,9 +92,12 @@ export default function DocsPage() {
           <Subheading className="mb-4">
             URL Structure
           </Subheading>
-          <div className="overflow-hidden rounded-lg bg-zinc-900 p-4 dark:bg-zinc-800">
+          <div className="overflow-hidden rounded-lg bg-zinc-900 p-4 dark:bg-zinc-800 mb-2">
             <Code>https://imges.dev/[dimensions]/[bg-color]/[fg-color]?[params]</Code>
           </div>
+          <Text className="text-sm text-zinc-500 dark:text-zinc-400">
+            For square images, use shorthand: <Code>[size]</Code> instead of <Code>[dimensions]</Code>
+          </Text>
           <div className="mt-6 space-y-4">
             <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
               <div className="mb-2 flex items-center gap-2">
@@ -85,10 +105,10 @@ export default function DocsPage() {
                 <Badge color="red">required</Badge>
               </div>
               <Text>
-                Format: <Code>WIDTHxHEIGHT</Code>
+                Format: <Code>WIDTHxHEIGHT</Code> or <Code>SIZE</Code> (for square)
               </Text>
               <Text className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                Examples: 800x600, 1920x1080, 300x200
+                Examples: <Code>800x600</Code>, <Code>1920x1080</Code>, <Code>300</Code> (creates 300x300)
               </Text>
             </div>
             <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
