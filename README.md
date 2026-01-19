@@ -21,13 +21,19 @@ A lightweight, fast placeholder image service built with Next.js and deployed on
 imges.dev/[width]x[height]/[bg-color]/[fg-color].[format]?text=[custom-text]&font=[font-name]&radius=[px]&shadow=[px]
 ```
 
+**Square images shorthand:**
+```
+imges.dev/[size]/[bg-color]/[fg-color].[format]?text=[custom-text]
+```
+
 ### Parameters
 
-- `width x height` - Image dimensions (required)
+- `width x height` - Image dimensions (required), or just `size` for square images
+  - Examples: `640x360`, `300` (creates 300x300)
 - `bg-color` - Background color in hex without # (optional, default: cccccc)
-  - Supports gradients: use `-to-` separator (e.g., `3b82f6-to-8b5cf6`)
+  - Supports gradients: use `-` separator (e.g., `3b82f6-8b5cf6`)
 - `fg-color` - Text color in hex without # (optional, default: 333333)
-- `format` - Output format: png, jpg, webp (optional, default: png)
+- `format` - Output format: png, jpg, webp (optional, default: webp)
 - `text` - Custom text to display with emoji support (optional, default: dimensions)
 - `font` - Font name from 20+ Google Fonts (optional, default: inter)
 - `radius` - Rounded corners in pixels, 0-500 (optional, default: 0)
@@ -38,11 +44,20 @@ imges.dev/[width]x[height]/[bg-color]/[fg-color].[format]?text=[custom-text]&fon
 ## Examples
 
 ```
+# Standard dimensions
 /640x360
 /640x360/3b82f6
 /640x360/1e293b/f97316
+
+# Square images (shorthand)
+/300
+/300/3b82f6
+/300.png
+/300@2x
+
+# With customization
 /640x360/8b5cf6/ffffff?text=Hello+World
-/800x600/3b82f6-to-8b5cf6.webp?text=Gradient&font=playfair-display&radius=20
+/800x600/3b82f6-8b5cf6.webp?text=Gradient&font=playfair-display&radius=20
 /1200x630.jpg?text=🚀+Launch+Day&font=inter&shadow=30&shadowColor=000000
 ```
 
