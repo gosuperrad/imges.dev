@@ -3,6 +3,7 @@ import { createCanvas, CanvasRenderingContext2D, loadImage } from "canvas";
 import sharp from "sharp";
 import { parse as parseEmoji } from "twemoji-parser";
 import { validateFont, loadGoogleFont } from "@/lib/fonts";
+import { trackImageEvent } from "@/lib/analytics";
 
 interface ImageParams {
   width: number;
@@ -975,6 +976,27 @@ export async function GET(
       buffer = pngBuffer;
       contentType = "image/png";
     }
+
+    // Track analytics (non-blocking)
+    trackImageEvent({
+      width: imageParams.width,
+      height: imageParams.height,
+      bgColor: imageParams.bgColor,
+      fgColor: imageParams.fgColor,
+      format: format,
+      hasText: text !== `${imageParams.width} × ${imageParams.height}`, // Has custom text
+      hasBorder: !!border && border > 0,
+      hasBlur: !!blur && blur > 0,
+      hasPattern: !!pattern,
+      hasGradient: !!imageParams.bgColor2,
+      hasCustomFont: !!fontKey,
+      queryParams: Object.fromEntries(searchParams.entries()),
+      userAgent: request.headers.get("user-agent") || undefined,
+      referrer: request.headers.get("referer") || undefined,
+    }).catch(err => {
+      // Silently fail - don't block response
+      console.error("Analytics tracking failed:", err);
+    });
 
     return new NextResponse(buffer as any, {
       headers: {

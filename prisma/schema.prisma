@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Analytics event for each image generation request
+model ImageEvent {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  
+  // Dimensions
+  width     Int
+  height    Int
+  
+  // Colors (hex without #, nullable)
+  bgColor   String?
+  fgColor   String?
+  
+  // Format
+  format    String   // png, jpeg, webp
+  
+  // Features (booleans for quick filtering)
+  hasText     Boolean @default(false)
+  hasBorder   Boolean @default(false)
+  hasBlur     Boolean @default(false)
+  hasPattern  Boolean @default(false)
+  hasGradient Boolean @default(false)
+  hasCustomFont Boolean @default(false)
+  
+  // Query parameters (JSON for flexibility)
+  queryParams Json?
+  
+  // User agent / referrer (optional, for source tracking)
+  userAgent String?
+  referrer  String?
+  
+  @@index([createdAt])
+  @@index([width, height])
+  @@index([format])
+  @@index([bgColor])
+  @@index([fgColor])
+}
+
+// Pre-aggregated statistics (updated periodically)
+model PopularStats {
+  id        String   @id @default(cuid())
+  updatedAt DateTime @updatedAt
+  
+  // What kind of stat
+  statType  String   // "dimension", "bgColor", "fgColor", "format", "feature"
+  
+  // The value
+  statValue String   // e.g., "800x600", "3b82f6", "png", "hasText"
+  
+  // Count
+  count     Int      @default(0)
+  
+  // Time period (for trending)
+  period    String   @default("all") // "all", "daily", "weekly", "monthly"
+  periodDate DateTime? // For time-based periods
+  
+  @@unique([statType, statValue, period, periodDate])
+  @@index([statType, count])
+}

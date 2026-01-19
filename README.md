@@ -14,6 +14,7 @@ A lightweight, fast placeholder image service built with Next.js and deployed on
 - Multiple formats: PNG, JPEG, WebP
 - Retina support (@2x, @3x)
 - Interactive image builder on homepage
+- **Analytics tracking** - Track popular sizes, colors, and features used
 
 ## URL Format
 
@@ -63,6 +64,18 @@ imges.dev/[size]/[bg-color]/[fg-color].[format]?text=[custom-text]
 
 Visit [imges.dev/examples](https://imges.dev/examples) for a full gallery of examples.
 
+## Analytics
+
+imges.dev tracks anonymous usage analytics in production to understand popular sizes, colors, and features. View real-time analytics at [imges.dev/analytics](https://imges.dev/analytics).
+
+**Tracked data:**
+- Image dimensions
+- Background and foreground colors
+- Image formats (PNG, JPEG, WebP)
+- Features used (text, borders, blur, patterns, gradients, custom fonts)
+
+Analytics are powered by Prisma + PostgreSQL running on Railway. No personally identifiable information is collected.
+
 ## Development
 
 ```bash
@@ -75,6 +88,12 @@ Visit http://localhost:3000 to see the landing page with examples.
 ## Deployment
 
 This project is deployed on Railway with automatic deployments from the `main` branch.
+
+### Railway Setup
+
+1. **PostgreSQL Database**: Add the PostgreSQL plugin to your Railway project
+2. **Environment Variables**: Configure in your main service:
+   - `DATABASE_URL=${{Postgres.DATABASE_URL}}` (links to internal database URL - avoids egress fees)
 
 ### System Dependencies
 
@@ -98,6 +117,7 @@ These are included in the Dockerfile for Railway deployment.
 - Twemoji for emoji support
 - TailwindCSS 4 for styling
 - TypeScript
+- Prisma ORM + PostgreSQL for analytics
 - Deployed on Railway
 
 ## Development
@@ -105,6 +125,12 @@ These are included in the Dockerfile for Railway deployment.
 ```bash
 # Install dependencies
 npm install --legacy-peer-deps
+
+# Set up database (optional - analytics won't work locally without this)
+# 1. Add PostgreSQL connection string to .env:
+#    DATABASE_URL="postgresql://user:password@host:port/database"
+# 2. Run Prisma migrations:
+npx prisma migrate dev
 
 # Run development server
 npm run dev
@@ -117,6 +143,8 @@ npm start
 ```
 
 Visit http://localhost:3000 to use the interactive image builder.
+
+**Note:** Analytics tracking is disabled in development mode to avoid polluting production data. To test analytics locally, temporarily change the environment check in `lib/analytics.ts`.
 
 ## Contributing
 
