@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from './catalyst/button';
 import { Input } from './catalyst/input';
@@ -92,8 +92,11 @@ export default function ImageBuilder() {
 
   const [copied, setCopied] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
+  const [imageLoading, setImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
+  
+  // Track if this is the initial mount
+  const isInitialMount = useRef(true);
 
   const generateUrl = (cfg: ImageConfig): string => {
     let path = `/${cfg.width}x${cfg.height}`;
@@ -138,8 +141,8 @@ export default function ImageBuilder() {
     return queryString ? `${path}?${queryString}` : path;
   };
 
-  // Generate initial URL
-  const imageUrl = generateUrl(config);
+  // Generate URL (memoized to prevent unnecessary re-renders)
+  const imageUrl = useMemo(() => generateUrl(config), [config]);
 
   const updateConfig = (updates: Partial<ImageConfig>) => {
     setConfig((prev) => ({ ...prev, ...updates }));
@@ -217,8 +220,12 @@ export default function ImageBuilder() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [imageUrl, config]);
 
-  // Reset loading state when URL changes
+  // Reset loading state when URL changes (skip initial mount)
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     setImageLoading(true);
     setImageError(false);
   }, [imageUrl]);
