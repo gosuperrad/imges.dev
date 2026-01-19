@@ -216,6 +216,51 @@ export default function DocsPage() {
               imageUrl="/800x600/ffffff/333333?text=Shadow&shadow=20&shadowColor=000000&size=60"
             />
 
+            <ParamCard
+              name="noise"
+              description="Add noise/grain texture effect (0-100). Great for vintage or textured looks."
+              example="/800x600?text=Noisy&noise=50"
+              imageUrl="/800x600/3b82f6/ffffff?text=Noisy&noise=50&size=60"
+            />
+
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+              <Subheading level={3} className="mb-2">
+                pattern
+              </Subheading>
+              <Text className="mb-3">
+                Add pattern overlay: dots, stripes, checkerboard, or grid (use with patternColor for custom colors)
+              </Text>
+              <div className="mb-3 rounded bg-zinc-50 p-3 dark:bg-zinc-800">
+                <Code className="text-sm">/800x600?pattern=dots&patternColor=3b82f6</Code>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <img
+                  src="/300x200/f8fafc/000000?pattern=dots&patternColor=3b82f6&text="
+                  alt="Dots pattern"
+                  className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+                  loading="lazy"
+                />
+                <img
+                  src="/300x200/f8fafc/000000?pattern=stripes&patternColor=8b5cf6&text="
+                  alt="Stripes pattern"
+                  className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+                  loading="lazy"
+                />
+                <img
+                  src="/300x200/f8fafc/000000?pattern=checkerboard&patternColor=10b981&text="
+                  alt="Checkerboard pattern"
+                  className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+                  loading="lazy"
+                />
+                <img
+                  src="/300x200/f8fafc/000000?pattern=grid&patternColor=f59e0b&text="
+                  alt="Grid pattern"
+                  className="w-full rounded border border-zinc-200 dark:border-zinc-700"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+
             <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
               <Subheading level={3} className="mb-2">
                 format

@@ -27,6 +27,9 @@ interface RenderOptions {
   radius?: number;
   shadow?: number;
   shadowColor?: string;
+  noise?: number;
+  pattern?: "dots" | "stripes" | "checkerboard" | "grid";
+  patternColor?: string;
 }
 
 function generateRandomColor(): string {
@@ -208,6 +211,97 @@ function drawGradientRounded(
   
   drawRoundedRect(ctx, 0, 0, width, height, radius);
   ctx.fill();
+}
+
+function applyNoise(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  amount: number
+) {
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const data = imageData.data;
+  
+  // Apply noise to each pixel
+  for (let i = 0; i < data.length; i += 4) {
+    // Random noise value between -amount and +amount
+    const noise = (Math.random() - 0.5) * amount * 2;
+    data[i] = Math.max(0, Math.min(255, data[i] + noise));     // R
+    data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise)); // G
+    data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise)); // B
+    // Alpha channel (i + 3) remains unchanged
+  }
+  
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function drawPattern(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  pattern: "dots" | "stripes" | "checkerboard" | "grid",
+  color: string
+) {
+  ctx.fillStyle = normalizeColor(color);
+  ctx.strokeStyle = normalizeColor(color);
+  
+  const spacing = Math.min(width, height) / 20; // Adaptive spacing
+  
+  switch (pattern) {
+    case "dots":
+      // Draw dot pattern
+      for (let x = spacing / 2; x < width; x += spacing) {
+        for (let y = spacing / 2; y < height; y += spacing) {
+          ctx.beginPath();
+          ctx.arc(x, y, spacing / 8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      break;
+      
+    case "stripes":
+      // Draw diagonal stripes
+      ctx.lineWidth = spacing / 4;
+      for (let i = -height; i < width + height; i += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i + height, height);
+        ctx.stroke();
+      }
+      break;
+      
+    case "checkerboard":
+      // Draw checkerboard pattern
+      const squareSize = spacing;
+      for (let x = 0; x < width; x += squareSize) {
+        for (let y = 0; y < height; y += squareSize) {
+          // Alternate squares
+          if ((Math.floor(x / squareSize) + Math.floor(y / squareSize)) % 2 === 0) {
+            ctx.fillRect(x, y, squareSize, squareSize);
+          }
+        }
+      }
+      break;
+      
+    case "grid":
+      // Draw grid pattern
+      ctx.lineWidth = spacing / 20;
+      // Vertical lines
+      for (let x = 0; x <= width; x += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      // Horizontal lines
+      for (let y = 0; y <= height; y += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+      break;
+  }
 }
 
 async function drawTextWithEmojis(
@@ -410,6 +504,26 @@ export async function GET(
   
   const shadowColor = searchParams.get("shadowColor") || "000000";
   
+  const noise = searchParams.get("noise") ? parseInt(searchParams.get("noise")!) : undefined;
+  
+  // Validate noise
+  if (noise !== undefined && (isNaN(noise) || noise < 0 || noise > 100)) {
+    return createErrorResponse(
+      `Invalid noise amount: "${searchParams.get("noise")}". Must be a number between 0 and 100.`
+    );
+  }
+  
+  const pattern = searchParams.get("pattern") as "dots" | "stripes" | "checkerboard" | "grid" | null;
+  
+  // Validate pattern
+  if (pattern && !["dots", "stripes", "checkerboard", "grid"].includes(pattern)) {
+    return createErrorResponse(
+      `Invalid pattern: "${pattern}". Must be one of: dots, stripes, checkerboard, grid`
+    );
+  }
+  
+  const patternColor = searchParams.get("patternColor") || imageParams.fgColor;
+  
   const quality = searchParams.get("quality") ? parseInt(searchParams.get("quality")!) : 90;
   
   // Validate quality
@@ -485,6 +599,16 @@ export async function GET(
     // Apply blur effect to background if specified
     if (blur && blur > 0) {
       applyBlur(ctx, actualWidth, actualHeight, blur * imageParams.scale);
+    }
+
+    // Apply pattern if specified
+    if (pattern) {
+      drawPattern(ctx, actualWidth, actualHeight, pattern, patternColor);
+    }
+
+    // Apply noise/grain effect if specified
+    if (noise && noise > 0) {
+      applyNoise(ctx, actualWidth, actualHeight, noise);
     }
 
     // Draw border if specified

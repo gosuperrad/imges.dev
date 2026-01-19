@@ -165,6 +165,48 @@ const examples: Example[] = [
     url: "/700x500/6366f1/ffffff?text=Premium%20Card&radius=30&shadow=20&shadowColor=4338ca&size=60&weight=bold",
     category: "Effects"
   },
+  {
+    title: "Vintage Noise",
+    description: "Grain texture for vintage aesthetics",
+    url: "/800x600/f4e4c1/5d4e37?text=Vintage%20Photo&noise=60&size=60&font=lora",
+    category: "Effects"
+  },
+  {
+    title: "Dots Pattern",
+    description: "Polka dot pattern overlay",
+    url: "/800x600/fef3c7/92400e?pattern=dots&patternColor=f59e0b&text=Dots",
+    category: "Patterns"
+  },
+  {
+    title: "Stripes Pattern",
+    description: "Diagonal stripes for dynamic look",
+    url: "/800x600/dbeafe/1e40af?pattern=stripes&patternColor=3b82f6&text=Stripes&size=70&weight=bold",
+    category: "Patterns"
+  },
+  {
+    title: "Checkerboard",
+    description: "Classic checkerboard pattern",
+    url: "/800x600/f8fafc/1e293b?pattern=checkerboard&patternColor=94a3b8&text=Checkerboard",
+    category: "Patterns"
+  },
+  {
+    title: "Grid Pattern",
+    description: "Clean grid overlay",
+    url: "/800x600/ecfdf5/065f46?pattern=grid&patternColor=10b981&text=Grid&size=70",
+    category: "Patterns"
+  },
+  {
+    title: "Noisy Gradient",
+    description: "Gradient with grain texture",
+    url: "/800x600/8b5cf6-ec4899/ffffff?text=Textured%20Gradient&noise=40&size=65&weight=bold",
+    category: "Effects"
+  },
+  {
+    title: "Pattern + Text",
+    description: "Dots pattern with custom text",
+    url: "/800x600/fff1f2/9f1239?pattern=dots&patternColor=fda4af&text=Sale%20🏷️&size=80&weight=bold",
+    category: "Patterns"
+  },
 ];
 
 const categories = ["All", ...Array.from(new Set(examples.map(e => e.category)))];
