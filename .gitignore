@@ -44,3 +44,6 @@ open-next.config.ts
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# url shortener data
+/data/short-urls.json

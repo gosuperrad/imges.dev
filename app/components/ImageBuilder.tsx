@@ -89,6 +89,9 @@ export default function ImageBuilder() {
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shortUrl, setShortUrl] = useState<string | null>(null);
+  const [isGeneratingShortUrl, setIsGeneratingShortUrl] = useState(false);
+  const [shortUrlError, setShortUrlError] = useState<string | null>(null);
 
   const generateUrl = (cfg: ImageConfig): string => {
     let path = `/${cfg.width}x${cfg.height}`;
@@ -185,6 +188,43 @@ export default function ImageBuilder() {
     link.href = imageUrl;
     link.download = `image-${config.width}x${config.height}.${config.format}`;
     link.click();
+  };
+
+  const generateShortUrl = async () => {
+    setIsGeneratingShortUrl(true);
+    setShortUrlError(null);
+
+    try {
+      const response = await fetch('/api/shorten', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: imageUrl }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create short URL');
+      }
+
+      const data = await response.json();
+      setShortUrl(data.shortUrl);
+    } catch (error) {
+      console.error('Error generating short URL:', error);
+      setShortUrlError(error instanceof Error ? error.message : 'Failed to generate short URL');
+    } finally {
+      setIsGeneratingShortUrl(false);
+    }
+  };
+
+  const copyShortUrl = () => {
+    if (shortUrl) {
+      const fullShortUrl = `${window.location.origin}${shortUrl}`;
+      navigator.clipboard.writeText(fullShortUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -673,7 +713,30 @@ export default function ImageBuilder() {
                 </code>
               </Field>
 
-              <div className="grid grid-cols-2 gap-3 mt-4">
+              {shortUrl && (
+                <Field>
+                  <Label>Short URL</Label>
+                  <div className="flex items-center gap-2 mt-3">
+                    <code className="flex-1 bg-zinc-900 dark:bg-zinc-950 text-cyan-400 p-3 rounded-lg text-sm font-mono">
+                      https://imges.dev{shortUrl}
+                    </code>
+                    <Button
+                      color="cyan"
+                      onClick={copyShortUrl}
+                    >
+                      {copied ? '✓ Copied' : 'Copy'}
+                    </Button>
+                  </div>
+                </Field>
+              )}
+
+              {shortUrlError && (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 p-3 rounded-lg text-sm mt-3">
+                  {shortUrlError}
+                </div>
+              )}
+
+              <div className="grid grid-cols-3 gap-3 mt-4">
                 <Button
                   color="cyan"
                   onClick={downloadImage}
@@ -691,7 +754,15 @@ export default function ImageBuilder() {
                   }}
                 >
                   <LinkIcon />
-                  Copy Full URL
+                  Copy URL
+                </Button>
+                <Button
+                  color="emerald"
+                  onClick={generateShortUrl}
+                  disabled={isGeneratingShortUrl}
+                >
+                  <LinkIcon />
+                  {isGeneratingShortUrl ? 'Creating...' : 'Shorten'}
                 </Button>
               </div>
             </div>

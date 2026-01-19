@@ -419,6 +419,86 @@ export default function DocsPage() {
           </div>
         </section>
 
+        {/* URL Shortener */}
+        <section className="mb-16">
+          <Subheading className="mb-6">
+            URL Shortener
+          </Subheading>
+          <Text className="mb-4">
+            Create memorable short URLs for complex image configurations
+          </Text>
+          
+          <div className="space-y-6">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+              <Subheading level={3} className="mb-3">
+                Creating Short URLs
+              </Subheading>
+              <Text className="mb-3">
+                Use the <strong>Image Builder</strong> on the homepage to automatically generate short URLs, 
+                or create them programmatically via the API:
+              </Text>
+              <div className="overflow-hidden rounded-lg bg-zinc-900 p-4 dark:bg-zinc-800 mb-4">
+                <Code>POST /api/shorten</Code>
+              </div>
+              <div className="overflow-hidden rounded-lg bg-zinc-900 p-4 dark:bg-zinc-800">
+                <pre className="text-xs text-green-400 font-mono overflow-x-auto">
+{`{
+  "url": "/1200x630/3b82f6-8b5cf6/ffffff?text=Hello&noise=50"
+}`}
+                </pre>
+              </div>
+              <Text className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
+                Response includes a memorable short code like <Code>neon-grid</Code> or <Code>blue-cat</Code>
+              </Text>
+            </div>
+
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+              <Subheading level={3} className="mb-3">
+                Using Short URLs
+              </Subheading>
+              <Text className="mb-3">
+                Short URLs automatically redirect to the full image generation URL:
+              </Text>
+              <div className="space-y-3">
+                <div>
+                  <Text className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">Instead of:</Text>
+                  <div className="overflow-hidden rounded-lg bg-zinc-900 p-3 dark:bg-zinc-800">
+                    <Code className="text-xs">
+                      /1200x630/3b82f6-8b5cf6/ffffff?text=Hero&noise=50&pattern=dots
+                    </Code>
+                  </div>
+                </div>
+                <div>
+                  <Text className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">Use:</Text>
+                  <div className="overflow-hidden rounded-lg bg-zinc-900 p-3 dark:bg-zinc-800">
+                    <Code className="text-xs">/s/neon-grid</Code>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+              <Subheading level={3} className="mb-3">
+                Custom Short Codes
+              </Subheading>
+              <Text className="mb-3">
+                You can optionally specify a custom short code:
+              </Text>
+              <div className="overflow-hidden rounded-lg bg-zinc-900 p-4 dark:bg-zinc-800">
+                <pre className="text-xs text-green-400 font-mono overflow-x-auto">
+{`{
+  "url": "/800x600/3b82f6/ffffff?text=Logo",
+  "customCode": "company-logo"
+}`}
+                </pre>
+              </div>
+              <Text className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
+                Custom codes must be 3-50 characters, lowercase letters, numbers, and hyphens only
+              </Text>
+            </div>
+          </div>
+        </section>
+
         {/* Limits */}
         <section className="mb-16">
           <Subheading className="mb-6">

@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- URL shortener with memorable word-based codes (e.g., `/s/neon-grid`, `/s/blue-cat`)
+- POST `/api/shorten` endpoint to create short URLs
+- Custom short code support (3-50 characters, lowercase, hyphens, numbers)
+- Short URL redirect handler at `/s/[code]`
+- "Shorten" button in Image Builder UI
+- Hit counter for short URLs
+- URL shortener documentation section
+- File-based JSON storage for short URLs (`data/short-urls.json`)
 - GitHub Actions CI/CD workflows
 - Dependabot configuration for automated dependency updates
 - CodeQL security scanning
