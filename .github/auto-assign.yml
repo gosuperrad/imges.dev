@@ -12,7 +12,7 @@ numberOfReviewers: 1
 
 # Reviewers to add (will be rotated)
 reviewers:
-  - gosuperrad
+  - justin-peacock
 
 # Skip certain keywords in PR title/branch
 skipKeywords:
