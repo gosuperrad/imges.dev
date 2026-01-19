@@ -25,6 +25,9 @@ RUN npm ci --legacy-peer-deps --omit=dev || npm install --legacy-peer-deps --omi
 # Copy application code
 COPY . .
 
+# Generate Prisma Client
+RUN npx prisma generate
+
 # Build Next.js application
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
