@@ -120,6 +120,54 @@ These are included in the Dockerfile for Railway deployment.
 - Prisma ORM + PostgreSQL for analytics
 - Deployed on Railway
 
+## Security
+
+### Rate Limiting
+- **100 requests per minute** per IP address
+- Applies to image generation endpoints only (`/[...params]`)
+- Returns `429 Too Many Requests` with `Retry-After` header when exceeded
+- Automatic cleanup of expired rate limit records
+
+### Resource Limits
+- **Maximum 4 megapixels** per image (including scale multiplier)
+  - Example: 2000×2000 = 4M pixels ✓
+  - Example: 2000×2000@2x = 16M pixels ✗ (exceeds limit)
+- **Complexity scoring** prevents resource exhaustion from combining expensive effects
+  - Factors: pixel count, blur amount, noise, shadows, patterns, gradients
+  - Maximum complexity score: 15
+- **Text validation**: Limited to 1000 characters with control character sanitization
+
+### Analytics Access Control
+Set `ANALYTICS_TOKEN` environment variable in Railway to protect the `/analytics` dashboard:
+
+```bash
+# In Railway environment variables
+ANALYTICS_TOKEN=your-secure-token-here
+```
+
+Login at `/analytics/login` with your token to access analytics. If no token is set, analytics remain publicly accessible (not recommended for production).
+
+### Security Headers
+Configured via `next.config.ts`:
+- **Content Security Policy (CSP)**: Restricts resource loading to trusted sources
+- **X-Frame-Options**: `SAMEORIGIN` (prevents clickjacking)
+- **X-Content-Type-Options**: `nosniff` (prevents MIME sniffing)
+- **Referrer-Policy**: `strict-origin-when-cross-origin`
+- **Permissions-Policy**: Disables camera, microphone, geolocation
+- **X-Robots-Tag**: `noindex` for `/analytics`, index for public pages
+
+### Privacy
+- No personally identifiable information (PII) collected
+- No cookies for end users (analytics auth uses httpOnly cookies)
+- No IP address logging in analytics
+- See [Privacy Policy](https://imges.dev/privacy) for full details
+
+### Best Practices
+- All dependencies regularly updated via Dependabot
+- TypeScript strict mode enabled
+- Security audits via `npm audit` in CI/CD pipeline
+- Public repository (no sensitive data in commits)
+
 ## Development
 
 ```bash
