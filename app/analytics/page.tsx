@@ -5,13 +5,24 @@ import {
   getPopularFeatures,
   getTotalEvents
 } from "@/lib/analytics";
+import { isAnalyticsAuthenticated } from "@/lib/analytics-auth";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Analytics - imges.dev",
   description: "Usage analytics for imges.dev placeholder image generator",
 };
 
+// Force dynamic rendering (check auth on every request)
+export const dynamic = 'force-dynamic';
+
 export default async function AnalyticsPage() {
+  // Check authentication
+  const isAuth = await isAnalyticsAuthenticated();
+  if (!isAuth) {
+    redirect("/analytics/login");
+  }
+
   const [
     totalEvents,
     popularDimensions,
@@ -53,7 +64,7 @@ export default async function AnalyticsPage() {
               Popular Dimensions
             </h2>
             <div className="space-y-2">
-              {popularDimensions.map((item, index) => (
+              {popularDimensions.map((item: { dimension: string; count: number }, index: number) => (
                 <div key={index} className="flex justify-between items-center">
                   <span className="font-mono text-sm text-gray-700">
                     {item.dimension}
@@ -75,7 +86,7 @@ export default async function AnalyticsPage() {
               Popular Background Colors
             </h2>
             <div className="space-y-2">
-              {popularBgColors.map((item, index) => (
+              {popularBgColors.map((item: { color: string | null; count: number }, index: number) => (
                 <div key={index} className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <div 
@@ -103,7 +114,7 @@ export default async function AnalyticsPage() {
               Popular Text Colors
             </h2>
             <div className="space-y-2">
-              {popularFgColors.map((item, index) => (
+              {popularFgColors.map((item: { color: string | null; count: number }, index: number) => (
                 <div key={index} className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <div 
@@ -131,7 +142,7 @@ export default async function AnalyticsPage() {
               Popular Formats
             </h2>
             <div className="space-y-2">
-              {popularFormats.map((item, index) => (
+              {popularFormats.map((item: { format: string; count: number }, index: number) => (
                 <div key={index} className="flex justify-between items-center">
                   <span className="uppercase font-mono text-sm text-gray-700">
                     {item.format}
@@ -165,7 +176,7 @@ export default async function AnalyticsPage() {
               Popular Features
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              {popularFeatures.map((item, index) => (
+              {popularFeatures.map((item: { feature: string; count: number }, index: number) => (
                 <div key={index} className="flex flex-col">
                   <span className="text-sm font-medium text-gray-700 capitalize">
                     {item.feature.replace(/([A-Z])/g, " $1").trim()}

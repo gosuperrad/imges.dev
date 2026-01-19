@@ -25,6 +25,12 @@ RUN npm ci --legacy-peer-deps --omit=dev || npm install --legacy-peer-deps --omi
 # Copy application code
 COPY . .
 
+# Make startup script executable
+RUN chmod +x scripts/start.sh
+
+# Generate Prisma Client
+RUN npx prisma generate
+
 # Build Next.js application
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
@@ -45,5 +51,5 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Start the application using npm start (works with Railway)
-CMD ["npm", "start"]
+# Start with migrations then Next.js
+CMD ["./scripts/start.sh"]
