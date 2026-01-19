@@ -204,3 +204,11 @@ This project follows [Git Flow](./GIT_FLOW.md) branching model:
 - `ci/*` - CI/CD related branches
 
 See [CHANGELOG.md](./CHANGELOG.md) for project history.
+
+## License
+
+This project is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/).
+
+**TL;DR:** You can use, modify, and share this code for non-commercial purposes with attribution. Commercial use is not permitted.
+
+See [LICENSE](./LICENSE) for full details.

@@ -47,6 +47,7 @@ When making changes to this project, please update this CHANGELOG:
 - Resource complexity limits to prevent abuse (#20)
 - Square image shorthand: `/300` generates 300×300 (#17)
 - Prisma migrations run automatically on container startup (#26)
+- LICENSE file with CC BY-NC 4.0 (non-commercial license)
 
 ### Changed
 - Analytics page now uses dynamic rendering to enforce authentication (#27)
