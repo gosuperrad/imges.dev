@@ -2,6 +2,14 @@
 
 This guide is for AI coding agents and developers working on imges.dev, a Next.js 16 placeholder image generator deployed on Railway.
 
+## 🚨 Important Reminders
+
+**Before completing any task:**
+1. ✅ **Update CHANGELOG.md** - Add your changes under `[Unreleased]` with the appropriate category and PR number
+2. ✅ **Use merge commits** - When merging develop → main, use `--merge` (NOT `--squash`)
+3. ✅ **Test locally** - Run `npm run build` and `npx tsc --noEmit` before creating PR
+4. ✅ **Check Railway logs** - Verify deployments succeed and migrations run
+
 ## Project Overview
 
 **Stack**: Next.js 16 (App Router), TypeScript, React 19, TailwindCSS 4, node-canvas, Sharp
