@@ -38,15 +38,17 @@ export type SupportedFontKey = keyof typeof SUPPORTED_FONTS;
 // Cache directory for downloaded fonts
 const CACHE_DIR = path.join(process.cwd(), ".next", "cache", "fonts");
 
-// In-memory cache to track registered fonts
+// In-memory cache to track registered fonts (key: fontKey:weight)
 const registeredFonts = new Set<string>();
 
 /**
  * Download a font file - fetch from Google Fonts CSS API and extract TTF URL
+ * @param fontKey - The font identifier
+ * @param weight - Font weight (400 for normal, 700 for bold)
  */
-async function downloadFont(fontKey: SupportedFontKey): Promise<string> {
+async function downloadFont(fontKey: SupportedFontKey, weight: number = 400): Promise<string> {
   const fontName = SUPPORTED_FONTS[fontKey];
-  const filename = `${fontKey}.ttf`;
+  const filename = `${fontKey}-${weight}.ttf`;
   const filepath = path.join(CACHE_DIR, filename);
 
   // Check if already cached
@@ -64,7 +66,7 @@ async function downloadFont(fontKey: SupportedFontKey): Promise<string> {
     // Get CSS from Google Fonts with a User-Agent that triggers TrueType format
     // Android 4.4 and older browsers get TTF instead of WOFF2
     const googleFontName = fontName.replace(/ /g, '+');
-    const cssUrl = `https://fonts.googleapis.com/css?family=${googleFontName}:400`;
+    const cssUrl = `https://fonts.googleapis.com/css?family=${googleFontName}:${weight}`;
     
     const cssResponse = await fetch(cssUrl, {
       headers: {
@@ -81,7 +83,7 @@ async function downloadFont(fontKey: SupportedFontKey): Promise<string> {
     // Extract the font URL - look for url() in the CSS
     const urlMatch = cssText.match(/url\(([^)]+)\)/);
     if (!urlMatch || !urlMatch[1]) {
-      throw new Error(`Could not find font URL in CSS for ${fontName}`);
+      throw new Error(`Could not find font URL in CSS for ${fontName} weight ${weight}`);
     }
 
     const fontUrl = urlMatch[1].replace(/['"]/g, ''); // Remove quotes if any
@@ -97,33 +99,50 @@ async function downloadFont(fontKey: SupportedFontKey): Promise<string> {
 
     return filepath;
   } catch (error) {
-    console.error(`Error downloading font ${fontName}:`, error);
+    console.error(`Error downloading font ${fontName} weight ${weight}:`, error);
     throw error;
   }
 }
 
 /**
  * Load and register a Google Font for use with canvas
+ * @param fontKey - The font identifier
+ * @param fontWeight - Font weight string (normal, bold, or numeric)
  */
-export async function loadGoogleFont(fontKey: SupportedFontKey): Promise<string> {
+export async function loadGoogleFont(fontKey: SupportedFontKey, fontWeight: string = "normal"): Promise<string> {
   const fontName = SUPPORTED_FONTS[fontKey];
+  
+  // Convert font weight to numeric value
+  let numericWeight = 400;
+  if (fontWeight === "bold" || fontWeight === "700") {
+    numericWeight = 700;
+  } else if (fontWeight !== "normal" && !isNaN(parseInt(fontWeight))) {
+    numericWeight = parseInt(fontWeight);
+    // Clamp to valid range and round to nearest 100
+    numericWeight = Math.max(100, Math.min(900, Math.round(numericWeight / 100) * 100));
+  }
 
+  const cacheKey = `${fontKey}:${numericWeight}`;
+  
   // Check if already registered
-  if (registeredFonts.has(fontKey)) {
+  if (registeredFonts.has(cacheKey)) {
     return fontName;
   }
 
   try {
     // Download and cache the font
-    const fontPath = await downloadFont(fontKey);
+    const fontPath = await downloadFont(fontKey, numericWeight);
 
-    // Register with canvas
-    registerFont(fontPath, { family: fontName });
-    registeredFonts.add(fontKey);
+    // Register with canvas - use weight in family name to make it unique
+    registerFont(fontPath, { 
+      family: fontName,
+      weight: numericWeight.toString()
+    });
+    registeredFonts.add(cacheKey);
 
     return fontName;
   } catch (error) {
-    console.error(`Failed to load font ${fontName}:`, error);
+    console.error(`Failed to load font ${fontName} weight ${numericWeight}:`, error);
     // Fallback to sans-serif
     return "sans-serif";
   }
