@@ -48,6 +48,9 @@ When making changes to this project, please update this CHANGELOG:
 - Square image shorthand: `/300` generates 300×300 (#17)
 - Prisma migrations run automatically on container startup (#26)
 - LICENSE file with CC BY-NC 4.0 (non-commercial license)
+- Expanded ImageBuilder presets:
+  - 24 size presets (social media, video, mobile, web/UI)
+  - 32 color presets (vibrant, pastel, dark, light, nature, neon, professional)
 
 ### Changed
 - Analytics page now uses dynamic rendering to enforce authentication (#27)
@@ -61,12 +64,13 @@ When making changes to this project, please update this CHANGELOG:
 - Analytics authentication now properly enforced (#24, #27)
 - Same-site referrers excluded from analytics to prevent data pollution (#29)
 - Git Flow: Use merge commits instead of squash for develop → main
+- Bold font weight now works correctly with Google Fonts (downloads specific weight variants)
+- Fixed duplicate "Noise" slider in ImageBuilder - first slider now correctly labeled as "Border"
 
-### Security
-- Timing-safe token comparison for analytics authentication (#20)
-- Brute-force protection on login endpoint (#20)
-- Comprehensive security headers (#20)
-- Privacy policy compliance (#20)
+### Removed
+- @3x retina support (most sizes exceed 4000px limit when tripled)
+- Shadow parameter (canvas shadows extend outside image bounds - not fixable)
+- 4K preset from ImageBuilder (exceeds 4000px dimension limit)
 
 ---
 

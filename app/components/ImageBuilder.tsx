@@ -33,8 +33,6 @@ interface ImageConfig {
   border: number;
   borderColor: string;
   radius: number;
-  shadow: number;
-  shadowColor: string;
   noise: number;
   pattern: '' | 'dots' | 'stripes' | 'checkerboard' | 'grid';
   patternColor: string;
@@ -43,23 +41,87 @@ interface ImageConfig {
 }
 
 const SIZE_PRESETS = [
+  // Social Media
   { name: 'Open Graph', width: 1200, height: 630 },
-  { name: 'Full HD', width: 1920, height: 1080 },
+  { name: 'Twitter Card', width: 1200, height: 675 },
+  { name: 'Instagram Post', width: 1080, height: 1080 },
+  { name: 'Instagram Story', width: 1080, height: 1920 },
+  { name: 'Facebook Cover', width: 820, height: 312 },
+  { name: 'LinkedIn Post', width: 1200, height: 627 },
+  { name: 'Pinterest Pin', width: 1000, height: 1500 },
+  
+  // Video & Screens
+  { name: 'Full HD (1080p)', width: 1920, height: 1080 },
+  { name: 'HD (720p)', width: 1280, height: 720 },
+  { name: 'SD (480p)', width: 854, height: 480 },
+  { name: 'YouTube Thumbnail', width: 1280, height: 720 },
+  
+  // Common Ratios
+  { name: '16:9 Large', width: 1920, height: 1080 },
+  { name: '16:9 Medium', width: 1280, height: 720 },
   { name: '16:9 Small', width: 640, height: 360 },
-  { name: '4:3', width: 800, height: 600 },
-  { name: 'Square', width: 1080, height: 1080 },
-  { name: 'Twitter', width: 1200, height: 675 },
+  { name: '4:3 Classic', width: 800, height: 600 },
+  { name: '1:1 Square', width: 1080, height: 1080 },
+  { name: '2:3 Portrait', width: 1000, height: 1500 },
+  { name: '3:2 Landscape', width: 1500, height: 1000 },
+  
+  // Web & UI
+  { name: 'Blog Hero', width: 1200, height: 630 },
+  { name: 'Email Header', width: 600, height: 200 },
+  { name: 'Avatar Large', width: 400, height: 400 },
+  { name: 'Avatar Medium', width: 200, height: 200 },
+  { name: 'Card Thumbnail', width: 600, height: 400 },
+  
+  // Mobile
+  { name: 'iPhone 14/15', width: 1179, height: 2556 },
 ];
 
 const COLOR_PRESETS = [
-  { name: 'Vibrant', bg: '3b82f6', fg: 'ffffff' },
-  { name: 'Sunset', bg: 'ff6b6b', bg2: 'ffa500', fg: 'ffffff' },
-  { name: 'Ocean', bg: '0ea5e9', bg2: '06b6d4', fg: 'ffffff' },
-  { name: 'Purple', bg: '8b5cf6', bg2: 'ec4899', fg: 'ffffff' },
-  { name: 'Dark', bg: '1e293b', fg: 'f1f5f9' },
-  { name: 'Light', bg: 'f8fafc', fg: '1e293b' },
-  { name: 'Mint', bg: '10b981', fg: 'ffffff' },
-  { name: 'Warm', bg: 'f97316', bg2: 'dc2626', fg: 'ffffff' },
+  // Vibrant & Bold
+  { name: 'Blue Vibrant', bg: '3b82f6', fg: 'ffffff' },
+  { name: 'Purple Dream', bg: '8b5cf6', bg2: 'ec4899', fg: 'ffffff' },
+  { name: 'Ocean Wave', bg: '0ea5e9', bg2: '06b6d4', fg: 'ffffff' },
+  { name: 'Sunset Glow', bg: 'ff6b6b', bg2: 'ffa500', fg: 'ffffff' },
+  { name: 'Warm Fire', bg: 'f97316', bg2: 'dc2626', fg: 'ffffff' },
+  { name: 'Forest Green', bg: '10b981', fg: 'ffffff' },
+  { name: 'Royal Purple', bg: '7c3aed', fg: 'ffffff' },
+  { name: 'Crimson Red', bg: 'dc2626', fg: 'ffffff' },
+  
+  // Soft & Pastel
+  { name: 'Soft Pink', bg: 'fecaca', bg2: 'fed7aa', fg: '78350f' },
+  { name: 'Mint Fresh', bg: 'd1fae5', bg2: 'a7f3d0', fg: '065f46' },
+  { name: 'Lavender Sky', bg: 'e9d5ff', bg2: 'ddd6fe', fg: '5b21b6' },
+  { name: 'Peach Cream', bg: 'fed7aa', bg2: 'fef3c7', fg: '92400e' },
+  { name: 'Baby Blue', bg: 'dbeafe', bg2: 'bfdbfe', fg: '1e3a8a' },
+  
+  // Dark Themes
+  { name: 'Dark Slate', bg: '1e293b', fg: 'f1f5f9' },
+  { name: 'Midnight', bg: '0f172a', fg: 'e2e8f0' },
+  { name: 'Dark Purple', bg: '581c87', bg2: '3b0764', fg: 'faf5ff' },
+  { name: 'Deep Ocean', bg: '164e63', bg2: '083344', fg: 'ecfeff' },
+  { name: 'Charcoal', bg: '27272a', fg: 'fafafa' },
+  
+  // Light & Minimal
+  { name: 'Pure White', bg: 'ffffff', fg: '000000' },
+  { name: 'Light Gray', bg: 'f8fafc', fg: '1e293b' },
+  { name: 'Cream', bg: 'fef3c7', fg: '78350f' },
+  { name: 'Ice Blue', bg: 'f0f9ff', fg: '0c4a6e' },
+  
+  // Nature & Earth
+  { name: 'Earth Tones', bg: 'a16207', bg2: '78350f', fg: 'fef3c7' },
+  { name: 'Sage Green', bg: '84cc16', bg2: '65a30d', fg: 'ffffff' },
+  { name: 'Desert Sand', bg: 'f59e0b', bg2: 'd97706', fg: '451a03' },
+  
+  // Neon & Bright
+  { name: 'Neon Pink', bg: 'f0abfc', bg2: 'e879f9', fg: '3b0764' },
+  { name: 'Electric Blue', bg: '22d3ee', bg2: '06b6d4', fg: '083344' },
+  { name: 'Lime Pop', bg: 'a3e635', bg2: '84cc16', fg: '1a2e05' },
+  
+  // Professional
+  { name: 'Corporate Blue', bg: '1e40af', fg: 'ffffff' },
+  { name: 'Business Gray', bg: '475569', fg: 'f8fafc' },
+  { name: 'Trust Teal', bg: '0d9488', fg: 'ffffff' },
+  { name: 'Professional Navy', bg: '1e3a8a', fg: 'ffffff' },
 ];
 
 export default function ImageBuilder() {
@@ -81,8 +143,6 @@ export default function ImageBuilder() {
     border: 0,
     borderColor: '',
     radius: 0,
-    shadow: 0,
-    shadowColor: '000000',
     noise: 0,
     pattern: '',
     patternColor: '',
@@ -124,10 +184,6 @@ export default function ImageBuilder() {
     if (cfg.border > 0) params.set('border', cfg.border.toString());
     if (cfg.borderColor) params.set('borderColor', cfg.borderColor);
     if (cfg.radius > 0) params.set('radius', cfg.radius.toString());
-    if (cfg.shadow > 0) {
-      params.set('shadow', cfg.shadow.toString());
-      if (cfg.shadowColor !== '000000') params.set('shadowColor', cfg.shadowColor);
-    }
     if (cfg.noise > 0) params.set('noise', cfg.noise.toString());
     if (cfg.pattern) {
       params.set('pattern', cfg.pattern);
@@ -591,28 +647,6 @@ export default function ImageBuilder() {
                     value={config.borderColor}
                     onChange={(value) => updateConfig({ borderColor: value })}
                     placeholder={config.fgColor}
-                    className="mt-3"
-                  />
-                )}
-
-                <Field className="mt-3">
-                  <Label>Shadow: {config.shadow}px</Label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="50"
-                    value={config.shadow}
-                    onChange={(e) => updateConfig({ shadow: parseInt(e.target.value) })}
-                    className="w-full mt-2 cursor-pointer"
-                  />
-                </Field>
-
-                {config.shadow > 0 && (
-                  <ColorInput
-                    label="Shadow Color"
-                    value={config.shadowColor}
-                    onChange={(value) => updateConfig({ shadowColor: value })}
-                    placeholder="000000"
                     className="mt-3"
                   />
                 )}

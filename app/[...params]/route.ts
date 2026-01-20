@@ -26,8 +26,6 @@ interface RenderOptions {
   borderColor?: string;
   blur?: number;
   radius?: number;
-  shadow?: number;
-  shadowColor?: string;
   noise?: number;
   pattern?: "dots" | "stripes" | "checkerboard" | "grid";
   patternColor?: string;
@@ -201,12 +199,11 @@ function parseParams(params: string[]): ParseResult {
   let scale = 1;
   let format: "png" | "jpeg" | "webp" = defaults.format;
 
-  // Check for @2x, @3x suffix (supports both "640x360@2x" and "300@2x")
-  const retinaMatch = dimensionStr.match(/^(\d+(?:x\d+)?)@(\d)x$/);
+  // Check for @2x suffix (supports both "640x360@2x" and "300@2x")
+  const retinaMatch = dimensionStr.match(/^(\d+(?:x\d+)?)@2x$/);
   if (retinaMatch) {
     dimensionStr = retinaMatch[1];
-    scale = parseInt(retinaMatch[2]);
-    if (scale < 1 || scale > 3) scale = 1;
+    scale = 2;
   }
 
   // Check for format extension (supports both "640x360.png" and "300.png")
@@ -720,17 +717,18 @@ export async function GET(
   const { fontKey, fontFamily } = validateFont(fontParam);
   let font = fontFamily;
   
+  const fontWeight = searchParams.get("weight") || "normal";
+  
   // Load Google Font if requested
   if (fontKey) {
     try {
-      font = await loadGoogleFont(fontKey);
+      font = await loadGoogleFont(fontKey, fontWeight);
     } catch (error) {
       console.error("Failed to load Google Font:", error);
       // font will already be set to the family name or fallback
     }
   }
   
-  const fontWeight = searchParams.get("weight") || "normal";
   const fontStyle = searchParams.get("style") || "normal";
   const align = (searchParams.get("align") as "top" | "center" | "bottom" | "custom") || "center";
   
@@ -770,16 +768,6 @@ export async function GET(
   if (radiusError) {
     return createErrorResponse(radiusError);
   }
-  
-  const shadow = searchParams.get("shadow") ? parseInt(searchParams.get("shadow")!) : undefined;
-  
-  // Validate shadow
-  const shadowError = validateNumberParam(searchParams.get("shadow"), "shadow", 0, 100);
-  if (shadowError) {
-    return createErrorResponse(shadowError);
-  }
-  
-  const shadowColor = searchParams.get("shadowColor") || "000000";
   
   const noise = searchParams.get("noise") ? parseInt(searchParams.get("noise")!) : undefined;
   
@@ -851,7 +839,6 @@ export async function GET(
   let complexityScore = actualPixels / 1_000_000; // Base score from pixel count
   if (blur && blur > 0) complexityScore += blur / 10; // Blur is expensive
   if (noise && noise > 0) complexityScore += noise / 20;
-  if (shadow && shadow > 0) complexityScore += shadow / 20;
   if (pattern) complexityScore += 2; // Pattern overlay adds complexity
   if (fontKey) complexityScore += 1; // Custom font download/rendering
   if (imageParams.bgColor2) complexityScore += 0.5; // Gradient rendering
@@ -863,7 +850,7 @@ export async function GET(
       message: "Request too complex - combination of size and effects exceeds limits",
       received: `Complexity score: ${complexityScore.toFixed(1)}`,
       expected: `Maximum complexity score: ${MAX_COMPLEXITY}`,
-      suggestion: "Reduce image dimensions, scale factor, or number of effects (blur, noise, shadow, pattern)"
+      suggestion: "Reduce image dimensions, scale factor, or number of effects (blur, noise, pattern)"
     });
   }
 
@@ -891,14 +878,6 @@ export async function GET(
     const canvas = createCanvas(actualWidth, actualHeight);
     const ctx = canvas.getContext("2d");
 
-    // Apply shadow if specified
-    if (shadow && shadow > 0) {
-      ctx.shadowColor = normalizeColor(shadowColor);
-      ctx.shadowBlur = shadow * imageParams.scale;
-      ctx.shadowOffsetX = (shadow / 2) * imageParams.scale;
-      ctx.shadowOffsetY = (shadow / 2) * imageParams.scale;
-    }
-
     // Fill background (gradient or solid) with optional rounded corners
     if (radius && radius > 0) {
       const scaledRadius = radius * imageParams.scale;
@@ -917,12 +896,6 @@ export async function GET(
         ctx.fillRect(0, 0, actualWidth, actualHeight);
       }
     }
-
-    // Reset shadow for other elements
-    ctx.shadowColor = "transparent";
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
 
     // Apply blur effect to background if specified
     if (blur && blur > 0) {
