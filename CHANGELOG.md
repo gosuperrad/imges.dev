@@ -49,8 +49,8 @@ When making changes to this project, please update this CHANGELOG:
 - Prisma migrations run automatically on container startup (#26)
 - LICENSE file with CC BY-NC 4.0 (non-commercial license)
 - Expanded ImageBuilder presets:
-  - 26 size presets (social media, video, mobile, web/UI)
-  - 34 color presets (vibrant, pastel, dark, light, nature, neon, professional)
+  - 24 size presets (social media, video, mobile, web/UI)
+  - 32 color presets (vibrant, pastel, dark, light, nature, neon, professional)
 
 ### Changed
 - Analytics page now uses dynamic rendering to enforce authentication (#27)
@@ -65,12 +65,12 @@ When making changes to this project, please update this CHANGELOG:
 - Same-site referrers excluded from analytics to prevent data pollution (#29)
 - Git Flow: Use merge commits instead of squash for develop → main
 - Bold font weight now works correctly with Google Fonts (downloads specific weight variants)
-- Removed 4K preset from ImageBuilder (exceeds 4000px dimension limit)
 - Fixed duplicate "Noise" slider in ImageBuilder - first slider now correctly labeled as "Border"
 
 ### Removed
 - @3x retina support (most sizes exceed 4000px limit when tripled)
 - Shadow parameter (canvas shadows extend outside image bounds - not fixable)
+- 4K preset from ImageBuilder (exceeds 4000px dimension limit)
 
 ---
 
