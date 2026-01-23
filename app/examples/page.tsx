@@ -86,7 +86,7 @@ const examples: Example[] = [
   {
     title: "Retina Display",
     description: "2x resolution for sharp displays",
-    url: "/400x300@2x/06b6d4/ffffff?text=Retina%20@2x&weight=bold",
+    url: "/400x300@2x/06b6d4/ffffff?text=Retina%20@2x",
     category: "Retina"
   },
   {
@@ -138,15 +138,9 @@ const examples: Example[] = [
     category: "Typography"
   },
   {
-    title: "Shadow Effect",
-    description: "Drop shadow for depth",
-    url: "/600x400/ffffff/333333?text=Shadow%20Card&shadow=25&shadowColor=000000&radius=20&size=50",
-    category: "Effects"
-  },
-  {
     title: "Display Font",
     description: "Bold display font for impact",
-    url: "/800x600/ff6b6b/ffffff?text=BIG%20IMPACT&font=bebas-neue&size=100&weight=bold",
+    url: "/800x600/ff6b6b/ffffff?text=BIG%20IMPACT&font=bebas-neue&size=100",
     category: "Typography"
   },
   {
@@ -166,12 +160,6 @@ const examples: Example[] = [
     description: "Lora font with warm vintage feel",
     url: "/800x600/fef3c7/92400e?text=Vintage%20Style&font=lora&size=65&style=italic",
     category: "Typography"
-  },
-  {
-    title: "Rounded Shadow Combo",
-    description: "Combined radius and shadow effects",
-    url: "/700x500/6366f1/ffffff?text=Premium%20Card&radius=30&shadow=20&shadowColor=4338ca&size=60&weight=bold",
-    category: "Effects"
   },
   {
     title: "Vintage Noise",

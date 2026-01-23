@@ -224,13 +224,6 @@ export default function DocsPage() {
             />
 
             <ParamCard
-              name="shadow"
-              description="Shadow size in pixels (with optional shadowColor parameter)"
-              example="/800x600?text=Shadow&shadow=20&shadowColor=000000"
-              imageUrl="/800x600/ffffff/333333?text=Shadow&shadow=20&shadowColor=000000&size=60"
-            />
-
-            <ParamCard
               name="noise"
               description="Add noise/grain texture effect (0-100). Great for vintage or textured looks."
               example="/800x600?text=Noisy&noise=50"
@@ -315,16 +308,16 @@ export default function DocsPage() {
 
             <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
               <Subheading level={3} className="mb-2">
-                Retina (@2x, @3x)
+                Retina (@2x)
               </Subheading>
               <Text className="mb-3">
                 High-resolution images for retina displays
               </Text>
               <div className="mb-3 rounded bg-zinc-50 p-3 dark:bg-zinc-800">
-                <Code className="text-sm">/800x600@2x or /800x600@3x</Code>
+                <Code className="text-sm">/800x600@2x</Code>
               </div>
               <Text className="text-sm text-zinc-500 dark:text-zinc-400">
-                Generates an image at 2x or 3x the specified dimensions
+                Generates an image at 2x the specified dimensions
               </Text>
             </div>
 
