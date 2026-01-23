@@ -67,6 +67,12 @@ When making changes to this project, please update this CHANGELOG:
 - Bold font weight now works correctly with Google Fonts (downloads specific weight variants)
 - Fixed duplicate "Noise" slider in ImageBuilder - first slider now correctly labeled as "Border"
 
+### Security
+- Timing-safe token comparison for analytics authentication (#20)
+- Brute-force protection on login endpoint (#20)
+- Comprehensive security headers (#20)
+- Privacy policy compliance (#20)
+
 ### Removed
 - @3x retina support (most sizes exceed 4000px limit when tripled)
 - Shadow parameter (canvas shadows extend outside image bounds - not fixable)
