@@ -34,12 +34,17 @@ When making changes to this project, please update this CHANGELOG:
 
 ## [Unreleased]
 
+### Changed
+- Update Prisma packages to 7.4.0 (#TBD)
+  - `prisma` from 7.2.0 to 7.4.0
+  - `@prisma/client` from 7.2.0 to 7.4.0
+  - `@prisma/adapter-pg` from 7.2.0 to 7.4.0
+  - All three packages must be updated together to prevent dependency conflicts
+
 ### Fixed
-- Move Tailwind CSS packages to dependencies for Railway build (#51)
+- Move Tailwind CSS packages to dependencies for Railway build (#52)
   - Fixes build error: "Cannot find module '@tailwindcss/postcss'"
   - Required for Docker builds using `npm ci --omit=dev`
-
-### Changed
 - Migrated from `middleware.ts` to `proxy.ts` for Next.js 16 compatibility (#51)
   - Renamed exported function from `middleware` to `proxy`
   - Fixes Railway deployment deprecation warning
