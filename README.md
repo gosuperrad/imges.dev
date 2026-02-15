@@ -12,7 +12,7 @@ A lightweight, fast placeholder image service built with Next.js and deployed on
 - 20+ Google Fonts across 4 categories (Sans-Serif, Serif, Monospace, Display)
 - Visual effects: rounded corners, drop shadows
 - Multiple formats: PNG, JPEG, WebP
-- Retina support (@2x, @3x)
+- Retina support (@2x)
 - Interactive image builder on homepage
 - **Analytics tracking** - Track popular sizes, colors, and features used
 
@@ -27,10 +27,16 @@ imges.dev/[width]x[height]/[bg-color]/[fg-color].[format]?text=[custom-text]&fon
 imges.dev/[size]/[bg-color]/[fg-color].[format]?text=[custom-text]
 ```
 
+**Retina displays:**
+```
+imges.dev/[width]x[height]@2x  or  imges.dev/[size]@2x
+```
+
 ### Parameters
 
 - `width x height` - Image dimensions (required), or just `size` for square images
   - Examples: `640x360`, `300` (creates 300x300)
+  - Retina: Add `@2x` suffix for 2x resolution (e.g., `/640x360@2x` generates 1280x720)
 - `bg-color` - Background color in hex without # (optional, default: cccccc)
   - Supports gradients: use `-` separator (e.g., `3b82f6-8b5cf6`)
 - `fg-color` - Text color in hex without # (optional, default: 333333)
@@ -40,7 +46,6 @@ imges.dev/[size]/[bg-color]/[fg-color].[format]?text=[custom-text]
 - `radius` - Rounded corners in pixels, 0-500 (optional, default: 0)
 - `shadow` - Drop shadow size in pixels, 0-100 (optional, default: 0)
 - `shadowColor` - Shadow color in hex without # (optional, default: 000000)
-- `retina` - Retina multiplier: 2 or 3 for @2x/@3x (optional)
 
 ## Examples
 

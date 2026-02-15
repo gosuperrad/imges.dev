@@ -419,7 +419,6 @@ export default function ImageBuilder() {
                     >
                       <option value="1">@1x</option>
                       <option value="2">@2x</option>
-                      <option value="3">@3x</option>
                     </Select>
                   </Field>
                   <Field>
