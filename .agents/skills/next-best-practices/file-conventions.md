@@ -90,15 +90,17 @@ app/
 
 Prefix with `_` to exclude from routing.
 
-## Middleware
+## Proxy (formerly Middleware)
+
+**Note**: In Next.js 16, `middleware.ts` was renamed to `proxy.ts` and the exported function changed from `middleware` to `proxy`. Use the codemod: `npx @next/codemod@canary middleware-to-proxy .`
 
 ```ts
-// middleware.ts (root of project)
+// proxy.ts (root of project)
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
-  // Auth, redirects, rewrites, etc.
+export function proxy(request: NextRequest) {
+  // Auth, redirects, rewrites, rate limiting, etc.
   return NextResponse.next();
 }
 
