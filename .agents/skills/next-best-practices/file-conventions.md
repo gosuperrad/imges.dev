@@ -90,9 +90,7 @@ app/
 
 Prefix with `_` to exclude from routing.
 
-## Middleware / Proxy
-
-### Next.js 14-15: `middleware.ts`
+## Middleware
 
 ```ts
 // middleware.ts (root of project)
@@ -109,31 +107,7 @@ export const config = {
 };
 ```
 
-### Next.js 16+: `proxy.ts`
-
-Renamed for clarity - same capabilities, different names:
-
-```ts
-// proxy.ts (root of project)
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-
-export function proxy(request: NextRequest) {
-  // Same logic as middleware
-  return NextResponse.next();
-}
-
-export const proxyConfig = {
-  matcher: ['/dashboard/:path*', '/api/:path*'],
-};
-```
-
-| Version | File | Export | Config |
-|---------|------|--------|--------|
-| v14-15 | `middleware.ts` | `middleware()` | `config` |
-| v16+ | `proxy.ts` | `proxy()` | `proxyConfig` |
-
-**Migration**: Run `npx @next/codemod@latest upgrade` to auto-rename.
+**Note**: Middleware runs on the Edge runtime and has access to request/response manipulation before routes are rendered.
 
 ## File Conventions Reference
 

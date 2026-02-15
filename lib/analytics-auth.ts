@@ -7,21 +7,20 @@
 
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { timingSafeEqual, createHmac } from "crypto";
+import { timingSafeEqual, createHash } from "crypto";
 
 const ANALYTICS_COOKIE_NAME = "analytics_auth";
 const ANALYTICS_TOKEN_ENV = "ANALYTICS_TOKEN";
 
 /**
  * Timing-safe string comparison to prevent timing attacks.
- * Uses HMAC comparison to avoid leaking string length differences.
+ * Uses SHA-256 hash to normalize strings to fixed-length digests before comparison.
  */
 function timingSafeCompare(a: string, b: string): boolean {
-  const key = Buffer.from("analytics-auth-compare-key");
-  const hmacA = createHmac("sha256", key).update(a).digest();
-  const hmacB = createHmac("sha256", key).update(b).digest();
+  const hashA = createHash("sha256").update(a).digest();
+  const hashB = createHash("sha256").update(b).digest();
 
-  return timingSafeEqual(hmacA, hmacB);
+  return timingSafeEqual(hashA, hashB);
 }
 
 /**
