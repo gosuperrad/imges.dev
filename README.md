@@ -12,7 +12,7 @@ A lightweight, fast placeholder image service built with Next.js and deployed on
 - 20+ Google Fonts across 4 categories (Sans-Serif, Serif, Monospace, Display)
 - Visual effects: rounded corners, drop shadows
 - Multiple formats: PNG, JPEG, WebP
-- Retina support (@2x, @3x)
+- Retina support (@2x)
 - Interactive image builder on homepage
 - **Analytics tracking** - Track popular sizes, colors, and features used
 
@@ -40,7 +40,7 @@ imges.dev/[size]/[bg-color]/[fg-color].[format]?text=[custom-text]
 - `radius` - Rounded corners in pixels, 0-500 (optional, default: 0)
 - `shadow` - Drop shadow size in pixels, 0-100 (optional, default: 0)
 - `shadowColor` - Shadow color in hex without # (optional, default: 000000)
-- `retina` - Retina multiplier: 2 or 3 for @2x/@3x (optional)
+- `retina` - Retina multiplier: 2 for @2x (optional)
 
 ## Examples
 

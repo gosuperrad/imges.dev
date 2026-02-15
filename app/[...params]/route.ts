@@ -8,7 +8,7 @@ import { trackImageEvent } from "@/lib/analytics";
 interface ImageParams {
   width: number;
   height: number;
-  scale: number; // For @2x, @3x support
+  scale: number; // For @2x support
   bgColor: string;
   bgColor2?: string; // For gradients
   fgColor: string;
