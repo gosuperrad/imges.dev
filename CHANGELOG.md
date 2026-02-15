@@ -34,6 +34,11 @@ When making changes to this project, please update this CHANGELOG:
 
 ## [Unreleased]
 
+### Fixed
+- Move Tailwind CSS packages to dependencies for Railway build (#51)
+  - Fixes build error: "Cannot find module '@tailwindcss/postcss'"
+  - Required for Docker builds using `npm ci --omit=dev`
+
 ### Changed
 - Migrated from `middleware.ts` to `proxy.ts` for Next.js 16 compatibility (#51)
   - Renamed exported function from `middleware` to `proxy`
