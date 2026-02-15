@@ -34,6 +34,11 @@ When making changes to this project, please update this CHANGELOG:
 
 ## [Unreleased]
 
+### Changed
+- Migrated from `middleware.ts` to `proxy.ts` for Next.js 16 compatibility (#51)
+  - Renamed exported function from `middleware` to `proxy`
+  - Fixes Railway deployment deprecation warning
+
 ### Added
 - Analytics tracking system with PostgreSQL database (#19)
   - Analytics dashboard at `/analytics` showing usage statistics

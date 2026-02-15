@@ -96,7 +96,7 @@ function isImageRequest(pathname: string): boolean {
   return /^\/\d+/.test(pathname);
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const clientId = getClientId(request);
 
