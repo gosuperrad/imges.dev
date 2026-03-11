@@ -539,6 +539,8 @@ export default function DocsPage() {
             <ul className="space-y-2 text-zinc-600 dark:text-zinc-400">
               <li>• Maximum dimensions: 4000x4000 pixels</li>
               <li>• Minimum dimensions: 1x1 pixels</li>
+              <li>• Maximum total pixels (after scale): 8,000,000</li>
+              <li>• Practical square limits: ~2828x2828 at @1x, ~1414x1414 at @2x</li>
               <li>• Images are cached for optimal performance</li>
               <li>• WebP format recommended for best compression</li>
               <li>• URL-encode special characters in text</li>
