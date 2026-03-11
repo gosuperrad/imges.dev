@@ -14,6 +14,7 @@ import { Divider } from './catalyst/divider';
 import { Accordion, AccordionItem } from './catalyst/accordion';
 import { ColorInput } from './catalyst/color-input';
 import { ArrowDownTrayIcon, LinkIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/16/solid';
+import { MAX_TOTAL_PIXELS } from '@/lib/limits';
 
 interface ImageConfig {
   width: number;
@@ -75,8 +76,6 @@ const SIZE_PRESETS = [
   // Mobile
   { name: 'iPhone 14/15', width: 1179, height: 2556 },
 ];
-
-const MAX_TOTAL_PIXELS = 8_000_000;
 
 const COLOR_PRESETS = [
   // Vibrant & Bold

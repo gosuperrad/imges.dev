@@ -4,6 +4,7 @@ import sharp from "sharp";
 import { parse as parseEmoji } from "twemoji-parser";
 import { validateFont, loadGoogleFont } from "@/lib/fonts";
 import { trackImageEvent } from "@/lib/analytics";
+import { MAX_TOTAL_PIXELS } from "@/lib/limits";
 
 interface ImageParams {
   width: number;
@@ -823,15 +824,13 @@ export async function GET(
 
   // Resource and complexity validation
   const actualPixels = imageParams.width * imageParams.height * (imageParams.scale * imageParams.scale);
-  const MAX_PIXELS = 8_000_000; // 8 megapixels (e.g., ~2828x2828)
-
-  if (actualPixels > MAX_PIXELS) {
+  if (actualPixels > MAX_TOTAL_PIXELS) {
     return createErrorResponse({
       field: "dimensions",
       message: "Total pixel count exceeds maximum (including scale multiplier)",
       received: `${imageParams.width}x${imageParams.height}@${imageParams.scale}x = ${actualPixels.toLocaleString()} pixels`,
-      expected: `Maximum ${MAX_PIXELS.toLocaleString()} pixels`,
-      suggestion: `Reduce dimensions or scale. Try: /${Math.floor(Math.sqrt(MAX_PIXELS / imageParams.scale / imageParams.scale))}x${Math.floor(Math.sqrt(MAX_PIXELS / imageParams.scale / imageParams.scale))}@${imageParams.scale}x`
+      expected: `Maximum ${MAX_TOTAL_PIXELS.toLocaleString()} pixels`,
+      suggestion: `Reduce dimensions or scale. Try: /${Math.floor(Math.sqrt(MAX_TOTAL_PIXELS / imageParams.scale / imageParams.scale))}x${Math.floor(Math.sqrt(MAX_TOTAL_PIXELS / imageParams.scale / imageParams.scale))}@${imageParams.scale}x`
     });
   }
 
