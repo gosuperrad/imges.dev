@@ -823,7 +823,7 @@ export async function GET(
 
   // Resource and complexity validation
   const actualPixels = imageParams.width * imageParams.height * (imageParams.scale * imageParams.scale);
-  const MAX_PIXELS = 4_000_000; // 4 megapixels (e.g., 2000x2000)
+  const MAX_PIXELS = 8_000_000; // 8 megapixels (e.g., ~2828x2828)
 
   if (actualPixels > MAX_PIXELS) {
     return createErrorResponse({
