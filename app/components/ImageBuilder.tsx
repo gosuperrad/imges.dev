@@ -14,6 +14,7 @@ import { Divider } from './catalyst/divider';
 import { Accordion, AccordionItem } from './catalyst/accordion';
 import { ColorInput } from './catalyst/color-input';
 import { ArrowDownTrayIcon, LinkIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/16/solid';
+import { MAX_TOTAL_PIXELS } from '@/lib/limits';
 
 interface ImageConfig {
   width: number;
@@ -208,6 +209,11 @@ export default function ImageBuilder() {
     updateConfig({ width: preset.width, height: preset.height });
   };
 
+  const isPresetAvailableAtScale = (preset: typeof SIZE_PRESETS[0], scale: number): boolean => {
+    const totalPixels = preset.width * preset.height * (scale * scale);
+    return totalPixels <= MAX_TOTAL_PIXELS;
+  };
+
   const applyColorPreset = (preset: typeof COLOR_PRESETS[0]) => {
     updateConfig({
       bgColor: preset.bg,
@@ -374,17 +380,32 @@ export default function ImageBuilder() {
                 <Field>
                   <Label>Presets</Label>
                   <div className="grid grid-cols-2 gap-2 mt-2">
-                    {SIZE_PRESETS.map((preset) => (
-                      <button
-                        key={preset.name}
-                        onClick={() => applyPreset(preset)}
-                        className="px-2 py-1.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded text-xs transition-colors border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 cursor-pointer"
-                      >
-                        {preset.name}
-                        <span className="block text-xs text-zinc-500 dark:text-zinc-400">{preset.width}×{preset.height}</span>
-                      </button>
-                    ))}
+                    {SIZE_PRESETS.map((preset) => {
+                      const isDisabled = !isPresetAvailableAtScale(preset, config.scale);
+
+                      return (
+                        <button
+                          key={preset.name}
+                          onClick={() => applyPreset(preset)}
+                          disabled={isDisabled}
+                          title={isDisabled ? `Unavailable at @${config.scale}x (exceeds ${MAX_TOTAL_PIXELS.toLocaleString()} pixel limit)` : undefined}
+                          className={`px-2 py-1.5 rounded text-xs transition-colors border ${
+                            isDisabled
+                              ? 'bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500 cursor-not-allowed opacity-60'
+                              : 'bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 cursor-pointer'
+                          }`}
+                        >
+                          {preset.name}
+                          <span className="block text-xs text-zinc-500 dark:text-zinc-400">{preset.width}×{preset.height}</span>
+                        </button>
+                      );
+                    })}
                   </div>
+                  {config.scale > 1 && (
+                    <Description className="mt-2 text-xs">
+                      Presets that exceed the {MAX_TOTAL_PIXELS.toLocaleString()}-pixel limit at @{config.scale}x are disabled.
+                    </Description>
+                  )}
                 </Field>
 
                 <div className="grid grid-cols-2 gap-3 mt-3">

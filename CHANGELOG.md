@@ -48,6 +48,11 @@ When making changes to this project, please update this CHANGELOG:
 - Migrated from `middleware.ts` to `proxy.ts` for Next.js 16 compatibility (#51)
   - Renamed exported function from `middleware` to `proxy`
   - Fixes Railway deployment deprecation warning
+- Disable oversized dimension presets when `@2x` is selected in ImageBuilder (#65)
+  - Presets now disable when scaled pixel count exceeds server limit (8,000,000 pixels)
+- Increase maximum total rendered pixels from 4,000,000 to 8,000,000 (#65)
+  - Allows larger images while keeping per-dimension cap at 4000x4000
+  - Improves practical max square size to ~2828x2828 at @1x and ~1414x1414 at @2x
 
 ### Added
 - Analytics tracking system with PostgreSQL database (#19)
