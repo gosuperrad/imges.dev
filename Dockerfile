@@ -19,8 +19,8 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json ./
 
-# Install production dependencies with legacy peer deps flag
-RUN npm ci --legacy-peer-deps --omit=dev || npm install --legacy-peer-deps --omit=dev
+# Install all dependencies (dev deps needed for build: typescript, @types/*)
+RUN npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
 # Copy application code
 COPY . .
@@ -34,6 +34,9 @@ RUN npx prisma generate
 # Build Next.js application
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
+
+# Remove dev dependencies after build
+RUN npm prune --omit=dev --legacy-peer-deps
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs && \
