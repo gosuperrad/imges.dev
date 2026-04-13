@@ -1,5 +1,5 @@
 # Use Node.js 22 with Debian base (better for Canvas dependencies)
-FROM node:22-bullseye-slim
+FROM node:22-bookworm-slim
 
 # Install system dependencies required for Canvas and Sharp
 RUN apt-get update && apt-get install -y \
