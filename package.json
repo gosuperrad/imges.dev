@@ -10,12 +10,12 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@headlessui/react": "^2.2.9",
+    "@headlessui/react": "^2.2.10",
     "@heroicons/react": "^2.2.0",
     "@prisma/adapter-pg": "^7.6.0",
     "@prisma/client": "^7.5.0",
     "@tailwindcss/postcss": "^4",
-    "canvas": "^3.2.2",
+    "canvas": "^3.2.3",
     "clsx": "^2.1.1",
     "dotenv": "^17.3.1",
     "motion": "^12.38.0",
