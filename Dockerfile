@@ -1,8 +1,9 @@
-# Use Node.js 22 with Debian base (better for Canvas dependencies)
-FROM node:22-bookworm-slim
+# syntax=docker/dockerfile:1.7
 
-# Install system dependencies required for Canvas and Sharp
-RUN apt-get update && apt-get install -y \
+# ---- Builder stage: full toolchain to build canvas/sharp and Next.js ----
+FROM node:22-bookworm-slim AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libcairo2-dev \
     libpango1.0-dev \
@@ -12,48 +13,56 @@ RUN apt-get update && apt-get install -y \
     libpixman-1-dev \
     pkg-config \
     python3 \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy package files
 COPY package.json package-lock.json ./
-
-# Install all dependencies (dev deps needed for build: typescript, @types/*)
 RUN npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
-# Copy application code
 COPY . .
 
-# Make startup script executable
-RUN chmod +x scripts/start.sh
-
-# Generate Prisma Client
-RUN npx prisma generate
-
-# Build Next.js application
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+RUN npx prisma generate && npm run build
 
-# Remove dev dependencies after build
+# Drop dev deps so the runner stage copies a smaller node_modules.
 RUN npm prune --omit=dev --legacy-peer-deps
 
-# Create a non-root user
+# ---- Runner stage: runtime libs only, files copied with ownership preset ----
+FROM node:22-bookworm-slim AS runner
+
+# Runtime shared libraries for canvas (no -dev headers, no compiler).
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libjpeg62-turbo \
+    libgif7 \
+    librsvg2-2 \
+    libpixman-1-0 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Set correct permissions
-RUN chown -R nextjs:nodejs /app
+WORKDIR /app
+
+# COPY --chown sets ownership at copy time, avoiding a slow recursive chown.
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/package.json /app/package-lock.json /app/next.config.ts ./
+COPY --from=builder --chown=nextjs:nodejs --chmod=755 /app/scripts ./scripts
 
 USER nextjs
 
-# Expose port
 EXPOSE 3000
 
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Start with migrations then Next.js
 CMD ["./scripts/start.sh"]
